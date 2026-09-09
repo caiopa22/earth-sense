@@ -1,4 +1,4 @@
-# smart-farm
+# Earth Sense
 
 Smart Farm is a full-stack application with a React frontend and an Express backend.
 

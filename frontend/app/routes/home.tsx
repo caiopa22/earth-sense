@@ -7,7 +7,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { TEAM } from "~/utils/constants";
+import { TEAM } from "~/lib/constants";
 import Logo from "~/components/ui/logo";
 
 export function meta({ }: Route.MetaArgs) {

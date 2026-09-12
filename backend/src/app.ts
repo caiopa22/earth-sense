@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express from 'express';
 import devicesRoutes from './routes/devices.routes.js';
 import soilReadingsRoutes from './routes/soilReadings.routes.js';
@@ -5,6 +6,8 @@ import userRoutes from './routes/user.routes.js';
 
 const app: express.Express = express();
 const port = Number(process.env.PORT || 3000);
+
+app.use(cors());
 
 app.use(express.json());
 

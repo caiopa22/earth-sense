@@ -36,13 +36,11 @@ function CustomTooltip({ active, payload, label }: any) {
 
 export function SoilChart({ readings, className }: SoilChartProps) {
   // Mostra apenas cada 4ª leitura no eixo X para não poluir
-  const data = readings
-    .slice(-48)
-    .map((r, i) => ({
-      time: formatTime(r.created_at),
-      humidity: r.humidity_pct,
-      index: i,
-    }));
+  const data = readings.slice(-48).map((r, i) => ({
+    time: formatTime(r.created_at),
+    humidity: r.humidity_pct,
+    index: i,
+  }));
 
   return (
     <div className={cn("w-full", className)}>

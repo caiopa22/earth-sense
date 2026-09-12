@@ -13,9 +13,7 @@ function getPreferredTheme(): Theme {
     return saved;
   }
 
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 export function ThemeToggle({ className }: { className?: string }) {

@@ -55,11 +55,7 @@ export const mockDevices: Device[] = [
 ];
 
 // ── Leituras de solo — últimas 24h (a cada 30min por dispositivo) ─────────────
-function generateReadings(
-  deviceId: string,
-  baseHumidity: number,
-  variance: number
-): SoilReading[] {
+function generateReadings(deviceId: string, baseHumidity: number, variance: number): SoilReading[] {
   const readings: SoilReading[] = [];
   const now = Date.now();
   const ADC_MAX = 3500;

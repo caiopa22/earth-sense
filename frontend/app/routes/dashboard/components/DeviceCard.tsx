@@ -29,15 +29,13 @@ export function DeviceCard({ device, isSelected, onClick }: DeviceCardProps) {
         "hover:border-primary/40 hover:bg-card/80",
         isSelected
           ? "border-primary/60 bg-primary/5 shadow-sm shadow-primary/10"
-          : "border-border/60 bg-card"
+          : "border-border/60 bg-card",
       )}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex flex-col gap-0.5">
-          <span className="text-sm font-semibold text-foreground leading-tight">
-            {device.name}
-          </span>
+          <span className="text-sm font-semibold text-foreground leading-tight">{device.name}</span>
           {device.location && (
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <MapPin className="w-3 h-3" />
@@ -51,21 +49,22 @@ export function DeviceCard({ device, isSelected, onClick }: DeviceCardProps) {
             "flex items-center gap-1 text-xs font-medium shrink-0 px-2 py-0.5 rounded-full",
             device.is_online
               ? "bg-emerald-500/10 text-emerald-500"
-              : "bg-muted text-muted-foreground"
+              : "bg-muted text-muted-foreground",
           )}
         >
-          {device.is_online ? (
-            <Wifi className="w-3 h-3" />
-          ) : (
-            <WifiOff className="w-3 h-3" />
-          )}
+          {device.is_online ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
           {device.is_online ? "Online" : "Offline"}
         </span>
       </div>
 
       {/* Humidity */}
       {humidity !== null && status ? (
-        <div className={cn("rounded-xl border px-3 py-2 flex items-center justify-between", SOIL_STATUS_BG[status])}>
+        <div
+          className={cn(
+            "rounded-xl border px-3 py-2 flex items-center justify-between",
+            SOIL_STATUS_BG[status],
+          )}
+        >
           <span className={cn("text-2xl font-bold tabular-nums", SOIL_STATUS_COLOR[status])}>
             {humidity.toFixed(0)}
             <span className="text-sm font-normal opacity-70">%</span>

@@ -6,7 +6,6 @@ import { EarthAgentPage } from "~/routes/dashboard/pages/EarthAgentPage";
 import { HistoryPage } from "~/routes/dashboard/pages/HistoryPage";
 import { OverviewPage } from "~/routes/dashboard/pages/OverviewPage";
 
-
 export function meta() {
   return [
     { title: "Dashboard — EarthSense" },
@@ -53,12 +52,8 @@ export default function DashboardRoute() {
               setSelectedDeviceId={setSelectedDeviceId}
             />
           )}
-          {activePage === "devices" && (
-            <DevicesPage devices={devices} />
-          )}
-          {activePage === "history" && (
-            <HistoryPage devices={devices} readings={readings} />
-          )}
+          {activePage === "devices" && <DevicesPage devices={devices} />}
+          {activePage === "history" && <HistoryPage devices={devices} readings={readings} />}
           {activePage === "agent" && <EarthAgentPage />}
         </main>
       </div>

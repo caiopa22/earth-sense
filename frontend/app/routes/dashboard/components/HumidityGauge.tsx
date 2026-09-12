@@ -32,12 +32,7 @@ export function HumidityGauge({ humidity, deviceName, className }: HumidityGauge
     <div className={cn("flex flex-col items-center gap-3", className)}>
       <div className="relative flex items-end justify-center">
         {/* SVG gauge — half-circle */}
-        <svg
-          width="200"
-          height="110"
-          viewBox="0 0 200 110"
-          className="overflow-visible"
-        >
+        <svg width="200" height="110" viewBox="0 0 200 110" className="overflow-visible">
           {/* Track */}
           <path
             d="M 15 100 A 85 85 0 0 1 185 100"
@@ -64,9 +59,7 @@ export function HumidityGauge({ humidity, deviceName, className }: HumidityGauge
             const angle = Math.PI * (1 - tick / 100);
             const x = 100 + 85 * Math.cos(angle);
             const y = 100 - 85 * Math.sin(angle);
-            return (
-              <circle key={tick} cx={x} cy={y} r={2} fill={arcColor} opacity={0.4} />
-            );
+            return <circle key={tick} cx={x} cy={y} r={2} fill={arcColor} opacity={0.4} />;
           })}
         </svg>
 
@@ -82,9 +75,7 @@ export function HumidityGauge({ humidity, deviceName, className }: HumidityGauge
       {/* Label */}
       <div className="flex flex-col items-center gap-0.5">
         <span className={cn("text-sm font-semibold", colorClass)}>{label}</span>
-        {deviceName && (
-          <span className="text-xs text-muted-foreground">{deviceName}</span>
-        )}
+        {deviceName && <span className="text-xs text-muted-foreground">{deviceName}</span>}
       </div>
     </div>
   );

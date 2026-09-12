@@ -31,7 +31,8 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const originalRequest = error.config as (typeof error.config & { _retry?: boolean }) | undefined;
+    const originalRequest = error.config as
+      (typeof error.config & { _retry?: boolean }) | undefined;
 
     if (error.response.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;

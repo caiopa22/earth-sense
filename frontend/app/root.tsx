@@ -9,6 +9,7 @@ import {
 
 import type { Route } from "./+types/root";
 import { Toaster } from "@/components/ui/toast";
+import { ProfileProvider } from "./contexts/useProfile";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -43,7 +44,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <ProfileProvider>
+      <Outlet />
+    </ProfileProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
@@ -54,9 +59,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   if (isRouteErrorResponse(error)) {
     message = error.status === 404 ? "404" : "Error";
     details =
-      error.status === 404
-        ? "The requested page could not be found."
-        : error.statusText || details;
+      error.status === 404 ? "The requested page could not be found." : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
     stack = error.stack;

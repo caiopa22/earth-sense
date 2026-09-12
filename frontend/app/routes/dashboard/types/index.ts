@@ -3,12 +3,7 @@
 // Quando a integração real for feita, apenas substitua os dados mockados —
 // estes tipos já são compatíveis com o retorno da API.
 
-export type SoilStatus =
-  | "dry"
-  | "low"
-  | "optimal"
-  | "high"
-  | "saturated";
+export type SoilStatus = "dry" | "low" | "optimal" | "high" | "saturated";
 
 export interface Device {
   id: string;
@@ -26,7 +21,7 @@ export interface Device {
 export interface SoilReading {
   id: string;
   device_id: string;
-  humidity_pct: number;   // 0–100
+  humidity_pct: number; // 0–100
   raw_value: number | null; // valor ADC bruto do ESP32
   created_at: string;
 }

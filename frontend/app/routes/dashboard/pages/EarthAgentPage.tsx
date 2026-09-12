@@ -6,27 +6,32 @@ const features = [
   {
     icon: BarChart2,
     title: "Análise de Tendências",
-    description: "O agente interpreta séries temporais de umidade, identificando padrões críticos antes que se tornem problemas.",
+    description:
+      "O agente interpreta séries temporais de umidade, identificando padrões críticos antes que se tornem problemas.",
   },
   {
     icon: Leaf,
     title: "Classificação do Solo",
-    description: "Classifica o estado do solo em 5 categorias (Seco → Saturado) com acurácia de 95%, baseado nas leituras do sensor.",
+    description:
+      "Classifica o estado do solo em 5 categorias (Seco → Saturado) com acurácia de 95%, baseado nas leituras do sensor.",
   },
   {
     icon: MessageSquare,
     title: "Linguagem Natural",
-    description: "Converse com o Earth Agent e receba recomendações de irrigação em português claro, sem jargão técnico.",
+    description:
+      "Converse com o Earth Agent e receba recomendações de irrigação em português claro, sem jargão técnico.",
   },
   {
     icon: Lightbulb,
     title: "Recomendações Personalizadas",
-    description: "Gera orientações de manejo adaptadas ao seu dispositivo, cultura e histórico de leituras.",
+    description:
+      "Gera orientações de manejo adaptadas ao seu dispositivo, cultura e histórico de leituras.",
   },
   {
     icon: Zap,
     title: "Contexto em Tempo Real",
-    description: "Utiliza RAG (Retrieval-Augmented Generation) para fundamentar respostas nos dados reais dos seus sensores.",
+    description:
+      "Utiliza RAG (Retrieval-Augmented Generation) para fundamentar respostas nos dados reais dos seus sensores.",
   },
 ];
 
@@ -49,7 +54,8 @@ export function EarthAgentPage() {
         <div className="flex flex-col gap-1.5">
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Earth Agent</h1>
           <p className="text-sm text-muted-foreground max-w-sm">
-            Agente de inteligência artificial especializado em análise de solo e recomendações de irrigação para a plataforma EarthSense.
+            Agente de inteligência artificial especializado em análise de solo e recomendações de
+            irrigação para a plataforma EarthSense.
           </p>
         </div>
       </div>
@@ -75,12 +81,10 @@ export function EarthAgentPage() {
       {/* CTA */}
       <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/3 p-6 flex flex-col items-center gap-3 text-center">
         <p className="text-xs text-muted-foreground">
-          O Earth Agent estará disponível em breve. Você será notificado quando o agente estiver pronto para uso.
+          O Earth Agent estará disponível em breve. Você será notificado quando o agente estiver
+          pronto para uso.
         </p>
-        <Button
-          disabled
-          className="rounded-full gap-2 cursor-not-allowed opacity-60"
-        >
+        <Button disabled className="rounded-full gap-2 cursor-not-allowed opacity-60">
           <Sparkles className="w-4 h-4" />
           Ativar Earth Agent
         </Button>

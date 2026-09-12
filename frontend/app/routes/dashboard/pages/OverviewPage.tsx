@@ -31,9 +31,7 @@ export function OverviewPage({
 
   const criticalAlerts = alerts.filter((a) => a.severity === "critical").length;
 
-  const selectedDevice: Device | undefined = devices.find(
-    (d) => d.id === selectedDeviceId
-  );
+  const selectedDevice: Device | undefined = devices.find((d) => d.id === selectedDeviceId);
   const selectedReadings = readings.filter((r) => r.device_id === selectedDeviceId);
   const currentHumidity = selectedDevice?.last_reading?.humidity_pct ?? 0;
 
@@ -87,14 +85,9 @@ export function OverviewPage({
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-6">
-              <HumidityGauge
-                humidity={currentHumidity}
-                className="shrink-0"
-              />
+              <HumidityGauge humidity={currentHumidity} className="shrink-0" />
               <div className="flex-1 w-full">
-                <p className="text-xs text-muted-foreground mb-2">
-                  Histórico — últimas 24h
-                </p>
+                <p className="text-xs text-muted-foreground mb-2">Histórico — últimas 24h</p>
                 <SoilChart readings={selectedReadings} />
               </div>
             </div>

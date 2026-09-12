@@ -10,10 +10,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TEAM } from "~/lib/constants";
 import Logo from "~/components/ui/logo";
 
-export function meta({ }: Route.MetaArgs) {
+export function meta({}: Route.MetaArgs) {
   return [
     { title: "EarthSense — Apresentação TCC | Ciência da Computação UNIP" },
-    { name: "description", content: "Monitoramento de Umidade do Solo via IoT e IA - Projeto de Conclusão de Curso UNIP 2026" },
+    {
+      name: "description",
+      content:
+        "Monitoramento de Umidade do Solo via IoT e IA - Projeto de Conclusão de Curso UNIP 2026",
+    },
   ];
 }
 
@@ -29,7 +33,11 @@ const PILLARS = [
     title: "Arquitetura Embarcada (IoT)",
     description: (
       <>
-        Microcontrolador <strong className="text-foreground font-medium">ESP32 SoC</strong> com processador dual-core integrado ao <strong className="text-foreground font-medium">Sensor Capacitivo de Umidade v1.2</strong> sem corrosão galvânica. Medição dielétrica estável por conversor ADC de 12 bits e amostragem configurada a cada 30 segundos.
+        Microcontrolador <strong className="text-foreground font-medium">ESP32 SoC</strong> com
+        processador dual-core integrado ao{" "}
+        <strong className="text-foreground font-medium">Sensor Capacitivo de Umidade v1.2</strong>{" "}
+        sem corrosão galvânica. Medição dielétrica estável por conversor ADC de 12 bits e amostragem
+        configurada a cada 30 segundos.
       </>
     ),
     tags: ["GPIO34 ADC", "Calibração Polinomial", "Deep Sleep <10µA", "Custo < R$ 150"],
@@ -38,28 +46,38 @@ const PILLARS = [
       { label: "Calibração Solo", value: "3500 / 1500", highlight: false, isHeader: false },
       { label: "Erro Médio", value: "±2,8%", highlight: true, isHeader: false },
       { label: "Consumo", value: "Bateria 18650", highlight: false, isHeader: false },
-    ]
+    ],
   },
   {
     step: "Pilar 02 • Camada Cognitiva",
     title: "Earth Agent (LLM)",
     description: (
       <>
-        Interpretação agronômica avançada e suporte autônomo à decisão de irrigação. Modelo treinado com <strong className="text-foreground font-medium">Retrieval-Augmented Generation (RAG)</strong> categorizando 5 faixas fenológicas de solo com <strong className="text-foreground font-medium">95% de acurácia</strong> validada.
+        Interpretação agronômica avançada e suporte autônomo à decisão de irrigação. Modelo treinado
+        com{" "}
+        <strong className="text-foreground font-medium">
+          Retrieval-Augmented Generation (RAG)
+        </strong>{" "}
+        categorizando 5 faixas fenológicas de solo com{" "}
+        <strong className="text-foreground font-medium">95% de acurácia</strong> validada.
       </>
     ),
     tags: ["95% Acurácia", "RAG Dinâmico", "5 Faixas de Solo", "19/20 Validações"],
     specs: [
       { label: "PARECER EM TEMPO REAL", value: "99,4% CONF.", highlight: true, isHeader: true },
     ],
-    quote: '"Umidade estável em 42,8% (Latossolo Bruno). Capacidade de campo atendida. Dispensar irrigação por 12h."'
+    quote:
+      '"Umidade estável em 42,8% (Latossolo Bruno). Capacidade de campo atendida. Dispensar irrigação por 12h."',
   },
   {
     step: "Pilar 03 • Persistência & Interface",
     title: "Nuvem Supabase & React",
     description: (
       <>
-        API RESTful com banco de dados <strong className="text-foreground font-medium">PostgreSQL via Supabase</strong>, políticas <strong className="text-foreground font-medium">Row Level Security (RLS)</strong> e telemetria analítica em tempo real construída com React 18 e TypeScript.
+        API RESTful com banco de dados{" "}
+        <strong className="text-foreground font-medium">PostgreSQL via Supabase</strong>, políticas{" "}
+        <strong className="text-foreground font-medium">Row Level Security (RLS)</strong> e
+        telemetria analítica em tempo real construída com React 18 e TypeScript.
       </>
     ),
     tags: ["PostgreSQL 15", "RLS Multi-tenant", "React + Vite", "380ms Latência"],
@@ -68,12 +86,11 @@ const PILLARS = [
       { label: "Segurança RLS", value: "Validada (CT08)", highlight: false, isHeader: false },
       { label: "Taxa Refresh", value: "~1,2 s", highlight: false, isHeader: false },
       { label: "Hospedagem", value: "Vercel + GitHub", highlight: false, isHeader: false },
-    ]
-  }
+    ],
+  },
 ];
 
 export default function Home() {
-
   const navigate = useNavigate();
 
   return (
@@ -113,7 +130,10 @@ export default function Home() {
 
         <div className="relative z-10 max-w-6xl mx-auto px-6 w-full">
           <div className="max-w-5xl space-y-6 text-left">
-            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 font-mono text-xs rounded-full py-1 px-3">
+            <Badge
+              variant="outline"
+              className="bg-primary/10 text-primary border-primary/20 font-mono text-xs rounded-full py-1 px-3"
+            >
               <span className="relative flex h-2 w-2 mr-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
@@ -122,11 +142,15 @@ export default function Home() {
             </Badge>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.08] max-w-5xl">
-              Monitoramento de Umidade do Solo via <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent italic font-light">IoT e IA</span>
+              Monitoramento de Umidade do Solo via{" "}
+              <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent italic font-light">
+                IoT e IA
+              </span>
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground font-light leading-relaxed max-w-2xl pt-2">
-              Apresentação do Trabalho de Conclusão de Curso (TCC) — Plataforma integrada com ESP32, sensoriamento capacitivo e agente de inteligência artificial.
+              Apresentação do Trabalho de Conclusão de Curso (TCC) — Plataforma integrada com ESP32,
+              sensoriamento capacitivo e agente de inteligência artificial.
             </p>
 
             {/* Metrics */}
@@ -135,7 +159,9 @@ export default function Home() {
                 {METRICS.map((metric, i) => (
                   <div key={i} className="flex gap-8 sm:gap-12 items-center">
                     <div className="space-y-1">
-                      <div className={`text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight font-mono ${metric.highlight}`}>
+                      <div
+                        className={`text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight font-mono ${metric.highlight}`}
+                      >
                         {metric.value}
                       </div>
                       <div className="text-xs sm:text-sm text-muted-foreground tracking-wide uppercase">
@@ -164,16 +190,19 @@ export default function Home() {
               Destaques da Arquitetura do Sistema
             </h2>
             <p className="text-muted-foreground mt-3 text-base font-light leading-relaxed">
-              Três pilares fundamentais projetados para garantir baixo custo, alta precisão sensorial e suporte autônomo à decisão agronômica.
+              Três pilares fundamentais projetados para garantir baixo custo, alta precisão
+              sensorial e suporte autônomo à decisão agronômica.
             </p>
           </div>
 
           <div className="space-y-8">
             {PILLARS.map((pillar, idx) => (
-              <Card key={idx} className="bg-card/50 backdrop-blur-md border-border hover:border-primary/30 transition-all duration-300">
+              <Card
+                key={idx}
+                className="bg-card/50 backdrop-blur-md border-border hover:border-primary/30 transition-all duration-300"
+              >
                 <CardContent className="p-8 md:p-10">
                   <div className="grid md:grid-cols-12 gap-8 items-center">
-
                     {/* Coluna de Texto Principal */}
                     <div className="md:col-span-8 space-y-4">
                       <div className="inline-flex items-center gap-2 text-xs font-mono text-primary font-semibold">
@@ -187,8 +216,12 @@ export default function Home() {
                         {pillar.description}
                       </p>
                       <div className="pt-2 flex flex-wrap gap-2">
-                        {pillar.tags.map(tag => (
-                          <Badge key={tag} variant="secondary" className="font-mono text-xs text-muted-foreground font-normal">
+                        {pillar.tags.map((tag) => (
+                          <Badge
+                            key={tag}
+                            variant="secondary"
+                            className="font-mono text-xs text-muted-foreground font-normal"
+                          >
                             {tag}
                           </Badge>
                         ))}
@@ -198,11 +231,20 @@ export default function Home() {
                     {/* Coluna de Especificações */}
                     <div className="md:col-span-4 border-t md:border-t-0 md:border-l border-border pt-4 md:pt-0 md:pl-8 space-y-2.5 font-mono text-xs text-muted-foreground">
                       {pillar.specs.map((spec, i) => (
-                        <div key={i} className={`flex justify-between py-1 ${i !== pillar.specs.length - 1 && !spec.isHeader ? 'border-b border-border' : ''}`}>
-                          <span className={spec.isHeader ? "text-[11px] text-primary font-semibold" : ""}>
+                        <div
+                          key={i}
+                          className={`flex justify-between py-1 ${i !== pillar.specs.length - 1 && !spec.isHeader ? "border-b border-border" : ""}`}
+                        >
+                          <span
+                            className={
+                              spec.isHeader ? "text-[11px] text-primary font-semibold" : ""
+                            }
+                          >
                             {spec.label}
                           </span>
-                          <span className={`font-semibold ${spec.highlight ? 'text-primary font-bold' : 'text-foreground'}`}>
+                          <span
+                            className={`font-semibold ${spec.highlight ? "text-primary font-bold" : "text-foreground"}`}
+                          >
                             {spec.value}
                           </span>
                         </div>
@@ -215,7 +257,6 @@ export default function Home() {
                         </p>
                       )}
                     </div>
-
                   </div>
                 </CardContent>
               </Card>
@@ -232,12 +273,17 @@ export default function Home() {
               <span className="text-[11px] font-mono tracking-widest uppercase text-primary block mb-1">
                 Projeto de Graduação · TCC
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Autores & Orientação</h2>
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+                Autores & Orientação
+              </h2>
               <p className="text-xs text-muted-foreground font-light mt-0.5">
                 Ciência da Computação — UNIP Marquês de São Vicente • 2026
               </p>
             </div>
-            <Badge variant="outline" className="px-3 py-1.5 font-mono text-xs rounded-full self-start md:self-auto border-border">
+            <Badge
+              variant="outline"
+              className="px-3 py-1.5 font-mono text-xs rounded-full self-start md:self-auto border-border"
+            >
               <span className="text-muted-foreground mr-1">Orientador:</span>
               <span className="text-primary font-medium">Prof. Marco Gomes</span>
             </Badge>
@@ -247,7 +293,9 @@ export default function Home() {
             {TEAM.map((member) => (
               <div key={member.ra} className="space-y-1">
                 <p className="text-sm font-medium text-foreground tracking-tight">{member.name}</p>
-                <span className="inline-block text-[11px] font-mono text-primary/90">RA: {member.ra}</span>
+                <span className="inline-block text-[11px] font-mono text-primary/90">
+                  RA: {member.ra}
+                </span>
               </div>
             ))}
           </div>

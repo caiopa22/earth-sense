@@ -3,12 +3,7 @@ import { LogOut, Settings, User, Bell } from "lucide-react";
 import { useNavigate } from "react-router";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/toast";
@@ -37,7 +32,12 @@ export function Header({ profile, alerts }: HeaderProps) {
   };
 
   const initials = profile.full_name
-    ? profile.full_name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase()
+    ? profile.full_name
+        .split(" ")
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
     : profile.email[0].toUpperCase();
 
   return (
@@ -125,11 +125,7 @@ export function Header({ profile, alerts }: HeaderProps) {
             <Button variant="ghost" className="rounded-full" onClick={() => setLogoutOpen(false)}>
               Cancelar
             </Button>
-            <Button
-              variant="destructive"
-              className="rounded-full"
-              onClick={handleLogout}
-            >
+            <Button variant="destructive" className="rounded-full" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-1.5" />
               Sair
             </Button>

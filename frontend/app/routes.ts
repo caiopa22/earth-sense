@@ -5,4 +5,3 @@ export default [
   route("auth", "routes/auth.tsx"),
   route("dashboard", "routes/dashboard.tsx"),
 ] satisfies RouteConfig;
-

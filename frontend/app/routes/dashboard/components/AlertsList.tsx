@@ -53,16 +53,11 @@ export function AlertsList({ alerts, className }: AlertsListProps) {
         return (
           <div
             key={alert.id}
-            className={cn(
-              "flex items-start gap-3 rounded-xl border px-3.5 py-3",
-              cfg.bg
-            )}
+            className={cn("flex items-start gap-3 rounded-xl border px-3.5 py-3", cfg.bg)}
           >
             <Icon className={cn("w-4 h-4 mt-0.5 shrink-0", cfg.color)} />
             <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-              <p className="text-xs font-medium text-foreground leading-snug">
-                {alert.message}
-              </p>
+              <p className="text-xs font-medium text-foreground leading-snug">{alert.message}</p>
               <span className="text-xs text-muted-foreground">
                 {alert.device_name} · {timeAgo(alert.created_at)} atrás
               </span>

@@ -1,13 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import {
-  Activity,
-  Eye,
-  EyeOff,
-  KeyRound,
-  Mail,
-  User,
-} from "lucide-react";
+import { Activity, Eye, EyeOff, KeyRound, Mail, User } from "lucide-react";
 import { cn } from "cn";
 
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -19,6 +12,7 @@ import { toast } from "@/components/ui/toast";
 import { authService } from "~/service/auth";
 
 import Logo from "~/components/ui/logo";
+import { useAuthPage } from "./hooks/useAuthPage";
 
 export function meta() {
   return [
@@ -32,16 +26,16 @@ export function meta() {
 
 export default function AuthRoute() {
   const navigate = useNavigate();
+  const { login, register } = useAuthPage();
+
   const [mode, setMode] = useState<"login" | "register">("login");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // States para Login
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
 
-  // States para Registro
   const [regName, setRegName] = useState("");
   const [regEmail, setRegEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
@@ -63,39 +57,16 @@ export default function AuthRoute() {
 
     try {
       if (mode === "login") {
-        const response = await authService.login({
-          email,
-          password,
+        await login({
+          email: email,
+          password: password,
         });
-
-        toast.add({
-          title: "Login realizado",
-          description: response.message || "Autenticado com sucesso! Redirecionando...",
-          type: "success",
-        });
-
-        setTimeout(() => navigate("/dashboard"), 800);
       } else {
-        await authService.register({
+        await register({
           name: regName,
           email: regEmail,
           password: regPassword,
         });
-
-        toast.add({
-          title: "Conta criada",
-          description: "Sua conta foi criada com sucesso! Você já pode acessar.",
-          type: "success",
-        });
-
-        setRegName("");
-        setRegEmail("");
-        setRegPassword("");
-        setAgreeTerms(false);
-
-        setTimeout(() => {
-          setMode("login");
-        }, 1000);
       }
     } catch (error: unknown) {
       const message =
@@ -105,7 +76,8 @@ export default function AuthRoute() {
 
       toast.add({
         title: mode === "login" ? "Falha no login" : "Falha no cadastro",
-        description: message || "Não foi possível concluir a operação. Verifique os dados e tente novamente.",
+        description:
+          message || "Não foi possível concluir a operação. Verifique os dados e tente novamente.",
         type: "error",
       });
     } finally {
@@ -147,7 +119,7 @@ export default function AuthRoute() {
               "px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer",
               mode === "login"
                 ? "bg-primary text-primary-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             Entrar
@@ -159,7 +131,7 @@ export default function AuthRoute() {
               "px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer",
               mode === "register"
                 ? "bg-primary text-primary-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             Criar Conta
@@ -180,7 +152,10 @@ export default function AuthRoute() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "register" && (
             <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+              <Label
+                htmlFor="name"
+                className="text-xs font-mono uppercase tracking-wider text-muted-foreground"
+              >
                 Nome Completo
               </Label>
               <div className="relative">
@@ -199,7 +174,10 @@ export default function AuthRoute() {
           )}
 
           <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+            <Label
+              htmlFor="email"
+              className="text-xs font-mono uppercase tracking-wider text-muted-foreground"
+            >
               E-mail
             </Label>
             <div className="relative">
@@ -210,9 +188,7 @@ export default function AuthRoute() {
                 placeholder="usuario@exemplo.com"
                 value={mode === "login" ? email : regEmail}
                 onChange={(e) =>
-                  mode === "login"
-                    ? setEmail(e.target.value)
-                    : setRegEmail(e.target.value)
+                  mode === "login" ? setEmail(e.target.value) : setRegEmail(e.target.value)
                 }
                 required
                 className="h-11 rounded-full bg-background/80 backdrop-blur-md border-border/80 pl-10 focus-visible:ring-primary shadow-xs"
@@ -222,7 +198,10 @@ export default function AuthRoute() {
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+              <Label
+                htmlFor="password"
+                className="text-xs font-mono uppercase tracking-wider text-muted-foreground"
+              >
                 Senha
               </Label>
               {mode === "login" && (
@@ -246,9 +225,7 @@ export default function AuthRoute() {
                 placeholder="••••••••••••"
                 value={mode === "login" ? password : regPassword}
                 onChange={(e) =>
-                  mode === "login"
-                    ? setPassword(e.target.value)
-                    : setRegPassword(e.target.value)
+                  mode === "login" ? setPassword(e.target.value) : setRegPassword(e.target.value)
                 }
                 required
                 minLength={mode === "register" ? 6 : undefined}

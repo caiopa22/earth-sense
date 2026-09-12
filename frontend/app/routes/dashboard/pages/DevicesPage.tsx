@@ -2,12 +2,7 @@ import { useState } from "react";
 import { Plus, MapPin, Wifi, WifiOff, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
@@ -49,7 +44,8 @@ export function DevicesPage({ devices }: DevicesPageProps) {
           <div className="flex flex-col gap-0.5">
             <h1 className="text-lg font-semibold text-foreground">Dispositivos</h1>
             <p className="text-xs text-muted-foreground">
-              {devices.length} sensor{devices.length !== 1 ? "es" : ""} registrado{devices.length !== 1 ? "s" : ""}
+              {devices.length} sensor{devices.length !== 1 ? "es" : ""} registrado
+              {devices.length !== 1 ? "s" : ""}
             </p>
           </div>
           <Button
@@ -79,17 +75,24 @@ export function DevicesPage({ devices }: DevicesPageProps) {
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <span className="text-sm font-semibold text-foreground">{device.name}</span>
-                      <span className="font-mono text-[10px] text-muted-foreground">{device.mac_address}</span>
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {device.mac_address}
+                      </span>
                     </div>
                   </div>
                   <Badge
                     variant="outline"
-                    className={device.is_online
-                      ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/8"
-                      : "border-border text-muted-foreground bg-muted/30"
+                    className={
+                      device.is_online
+                        ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/8"
+                        : "border-border text-muted-foreground bg-muted/30"
                     }
                   >
-                    {device.is_online ? <Wifi className="w-3 h-3 mr-1" /> : <WifiOff className="w-3 h-3 mr-1" />}
+                    {device.is_online ? (
+                      <Wifi className="w-3 h-3 mr-1" />
+                    ) : (
+                      <WifiOff className="w-3 h-3 mr-1" />
+                    )}
                     {device.is_online ? "Online" : "Offline"}
                   </Badge>
                 </div>
@@ -132,7 +135,10 @@ export function DevicesPage({ devices }: DevicesPageProps) {
           </DialogHeader>
           <form onSubmit={handleRegister} className="flex flex-col gap-4 mt-1">
             <div className="space-y-1.5">
-              <Label htmlFor="dev-name" className="text-xs text-muted-foreground uppercase tracking-wider font-mono">
+              <Label
+                htmlFor="dev-name"
+                className="text-xs text-muted-foreground uppercase tracking-wider font-mono"
+              >
                 Nome do Sensor
               </Label>
               <Input
@@ -145,7 +151,10 @@ export function DevicesPage({ devices }: DevicesPageProps) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="dev-mac" className="text-xs text-muted-foreground uppercase tracking-wider font-mono">
+              <Label
+                htmlFor="dev-mac"
+                className="text-xs text-muted-foreground uppercase tracking-wider font-mono"
+              >
                 MAC Address
               </Label>
               <Input
@@ -158,7 +167,10 @@ export function DevicesPage({ devices }: DevicesPageProps) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="dev-location" className="text-xs text-muted-foreground uppercase tracking-wider font-mono">
+              <Label
+                htmlFor="dev-location"
+                className="text-xs text-muted-foreground uppercase tracking-wider font-mono"
+              >
                 Localização
               </Label>
               <Input

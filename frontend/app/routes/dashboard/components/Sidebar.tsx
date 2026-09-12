@@ -40,7 +40,7 @@ export function Sidebar({ activePage, onNavigate }: SidebarProps) {
                 isActive
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
-                isComingSoon && "opacity-50 cursor-not-allowed"
+                isComingSoon && "opacity-50 cursor-not-allowed",
               )}
             >
               <Icon className="w-4 h-4 shrink-0" />

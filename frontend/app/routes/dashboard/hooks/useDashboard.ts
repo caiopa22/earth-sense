@@ -22,9 +22,7 @@ export function useDashboard(): DashboardData & {
   activePage: DashboardPage;
   setActivePage: (page: DashboardPage) => void;
 } {
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string>(
-    mockDevices[0]?.id ?? ""
-  );
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>(mockDevices[0]?.id ?? "");
   const [activePage, setActivePage] = useState<DashboardPage>("overview");
 
   const handleSetPage = useCallback((page: DashboardPage) => {

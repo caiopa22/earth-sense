@@ -4,19 +4,9 @@ import { supabaseAdmin } from '../database/supabase.js';
 import { requireAuth, type AuthenticatedRequest } from '../middlewares/authMiddleware.js';
 import type { CreateDeviceInput, Device, UpdateDeviceInput } from '../types/device.js';
 import { sendError } from '../utils/http.js';
+import { getAuthenticatedUserId } from '../utils/index.ts';
 
 const router = Router();
-
-const getAuthenticatedUserId = (req: AuthenticatedRequest, res: Response): string | null => {
-  const userId = req.user?.id;
-
-  if (!userId) {
-    sendError(res, 401, 'Authentication required.');
-    return null;
-  }
-
-  return userId;
-};
 
 router.get('/', requireAuth, async (req: AuthenticatedRequest, res) => {
   const userId = getAuthenticatedUserId(req, res);
@@ -42,12 +32,10 @@ router.post('/', requireAuth, async (req: AuthenticatedRequest, res) => {
   const userId = getAuthenticatedUserId(req, res);
   const { name, mac_address, location } = req.body as CreateDeviceInput;
 
-  if (!userId) {
-    return;
-  }
+  if (!userId) return;
 
-  if (!name || !mac_address) {
-    return sendError(res, 400, 'Name and MAC address are required.');
+  if (!name || !mac_address || !location) {
+    return sendError(res, 400, 'Name, MAC address, and location are required.');
   }
 
   const { data, error } = await supabaseAdmin

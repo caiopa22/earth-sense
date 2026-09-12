@@ -4,19 +4,9 @@ import { supabaseAdmin } from '../database/supabase.js';
 import { requireAuth, type AuthenticatedRequest } from '../middlewares/authMiddleware.js';
 import type { CreateSoilReadingInput, SoilReading, UpdateSoilReadingInput } from '../types/soilReading.js';
 import { sendError } from '../utils/http.js';
+import { getAuthenticatedUserId } from '../utils/index.ts';
 
 const router = Router();
-
-const getAuthenticatedUserId = (req: AuthenticatedRequest, res: Response): string | null => {
-  const userId = req.user?.id;
-
-  if (!userId) {
-    sendError(res, 401, 'Authentication required.');
-    return null;
-  }
-
-  return userId;
-};
 
 router.get('/', requireAuth, async (req: AuthenticatedRequest, res) => {
   const userId = getAuthenticatedUserId(req, res);
@@ -34,7 +24,7 @@ router.get('/', requireAuth, async (req: AuthenticatedRequest, res) => {
     return sendError(res, 500, error.message || 'Unable to fetch devices.');
   }
 
-  const deviceIds = (data ?? []).map((device) => device.id);
+  const deviceIds = (data ?? []).map((device: { id: string }) => device.id);
 
   if (deviceIds.length === 0) {
     return res.json({ readings: [] as SoilReading[] });

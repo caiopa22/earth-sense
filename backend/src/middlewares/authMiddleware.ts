@@ -19,7 +19,7 @@ export async function requireAuth(
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return sendError(res, 401, 'Authentication token is missing.');
+    return sendError(res, 401, 'Authorization header is missing or malformed.');
   }
 
   const token = authHeader.replace('Bearer ', '').trim();

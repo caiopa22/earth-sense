@@ -1,5 +1,5 @@
 import type { Route } from "./+types/home";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { ArrowRight, Activity } from "lucide-react";
 
 // Componentes Shadcn UI (Certifique-se de instalá-los via CLI do shadcn)
@@ -73,6 +73,9 @@ const PILLARS = [
 ];
 
 export default function Home() {
+
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* NAVBAR */}
@@ -84,13 +87,13 @@ export default function Home() {
 
           <div className="flex items-center gap-3">
             <ThemeToggle className="rounded-full border-border bg-background/80 shadow-sm" />
-            <Link
-              to="/auth"
+            <Button
               className="rounded-full bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground transition-all px-4 py-2 text-sm font-medium inline-flex items-center justify-center gap-2 shadow-xs"
+              onClick={() => navigate("/auth")}
             >
               Acessar Plataforma
               <ArrowRight className="w-4 h-4 ml-1" />
-            </Link>
+            </Button>
           </div>
         </div>
       </header>

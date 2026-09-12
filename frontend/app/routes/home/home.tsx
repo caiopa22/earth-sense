@@ -1,4 +1,4 @@
-import type { Route } from "./+types/home";
+import type { Route } from "../+types/home";
 import { Link, useNavigate } from "react-router";
 import { ArrowRight, Activity } from "lucide-react";
 

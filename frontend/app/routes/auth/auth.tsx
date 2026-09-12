@@ -16,6 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
+import { authService } from "~/service/auth";
 
 import Logo from "~/components/ui/logo";
 
@@ -46,7 +47,7 @@ export default function AuthRoute() {
   const [regPassword, setRegPassword] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (mode === "register" && !agreeTerms) {
@@ -60,26 +61,56 @@ export default function AuthRoute() {
 
     setIsLoading(true);
 
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
       if (mode === "login") {
+        const response = await authService.login({
+          email,
+          password,
+        });
+
         toast.add({
           title: "Login realizado",
-          description: "Autenticado com sucesso! Redirecionando...",
+          description: response.message || "Autenticado com sucesso! Redirecionando...",
           type: "success",
         });
-        setTimeout(() => navigate("/"), 800);
+
+        setTimeout(() => navigate("/dashboard"), 800);
       } else {
+        await authService.register({
+          name: regName,
+          email: regEmail,
+          password: regPassword,
+        });
+
         toast.add({
           title: "Conta criada",
           description: "Sua conta foi criada com sucesso! Você já pode acessar.",
           type: "success",
         });
+
+        setRegName("");
+        setRegEmail("");
+        setRegPassword("");
+        setAgreeTerms(false);
+
         setTimeout(() => {
           setMode("login");
         }, 1000);
       }
-    }, 800);
+    } catch (error: unknown) {
+      const message =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+
+      toast.add({
+        title: mode === "login" ? "Falha no login" : "Falha no cadastro",
+        description: message || "Não foi possível concluir a operação. Verifique os dados e tente novamente.",
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -92,8 +123,8 @@ export default function AuthRoute() {
           className="w-full h-full object-cover opacity-85 dark:opacity-60 saturate-[1.1] transition-all duration-700"
         />
         {/* Overlays de fade suaves preservando a nitidez da foto */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/30 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-background via-background/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-r from-background/90 via-background/30 to-transparent" />
       </div>
 
       {/* HEADER MINIMALISTA */}

@@ -7,10 +7,11 @@ import {
   ScrollRestoration,
 } from "react-router";
 
-import type { Route } from "./+types/root";
 import { Toaster } from "@/components/ui/toast";
-import { ProfileProvider } from "./contexts/useProfile";
+import type { Route } from "./+types/root";
 import "./app.css";
+import { AuthProvider } from "./contexts/auth-context";
+import { DashboardProvider } from "./contexts/dashboard-context";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -45,9 +46,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <ProfileProvider>
-      <Outlet />
-    </ProfileProvider>
+    <AuthProvider>
+      <DashboardProvider>
+        <Outlet />
+      </DashboardProvider>
+    </AuthProvider>
   );
 }
 

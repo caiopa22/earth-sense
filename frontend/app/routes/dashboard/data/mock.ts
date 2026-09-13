@@ -9,14 +9,14 @@
 // Os tipos estão em: app/dashboard/types/index.ts
 // ─────────────────────────────────────────────────────────────────────────────
 
-import type { Device, DashboardAlert, SoilReading, UserProfile } from "../types";
+import type { DashboardAlert, Device, Profile, SoilReading } from "../types";
 
 // ── Perfil do usuário ─────────────────────────────────────────────────────────
-export const mockProfile: UserProfile = {
+export const mockProfile: Profile = {
   id: "usr_mock_001",
+  name: "Erick Carvalho",
   email: "pesquisador@earthsense.app",
-  full_name: "Erick Carvalho",
-  avatar_url: null,
+  role: "user",
   created_at: "2026-01-15T10:00:00Z",
 };
 

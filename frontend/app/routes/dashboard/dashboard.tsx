@@ -17,7 +17,7 @@ export function meta() {
 }
 
 export default function DashboardRoute() {
-  const dashboard = useDashboard();
+
   const {
     profile,
     devices,
@@ -27,7 +27,12 @@ export default function DashboardRoute() {
     setSelectedDeviceId,
     activePage,
     setActivePage,
-  } = dashboard;
+    isAuthenticated,
+  } = useDashboard();
+
+  if (!isAuthenticated || !profile) {
+    return null;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-background text-foreground">

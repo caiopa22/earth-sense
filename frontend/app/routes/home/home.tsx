@@ -1,14 +1,14 @@
-import type { Route } from "../+types/home";
+import { ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router";
-import { ArrowRight, Activity } from "lucide-react";
 
 // Componentes Shadcn UI (Certifique-se de instalá-los via CLI do shadcn)
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { TEAM } from "~/lib/constants";
 import Logo from "~/components/ui/logo";
+import { TEAM } from "~/lib/constants";
+import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
   return [

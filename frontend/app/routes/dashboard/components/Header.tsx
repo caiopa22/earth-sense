@@ -7,10 +7,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/toast";
-import type { UserProfile, DashboardAlert } from "../types";
+import type { Profile, DashboardAlert } from "../types";
 
 interface HeaderProps {
-  profile: UserProfile;
+  profile: Profile;
   alerts: DashboardAlert[];
 }
 
@@ -31,8 +31,8 @@ export function Header({ profile, alerts }: HeaderProps) {
     setTimeout(() => navigate("/auth"), 600);
   };
 
-  const initials = profile.full_name
-    ? profile.full_name
+  const initials = profile.name
+    ? profile.name
         .split(" ")
         .slice(0, 2)
         .map((n) => n[0])
@@ -80,7 +80,7 @@ export function Header({ profile, alerts }: HeaderProps) {
             </div>
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-semibold text-foreground">
-                {profile.full_name ?? "Usuário"}
+                {profile.name ?? "Usuário"}
               </span>
               <span className="text-xs text-muted-foreground">{profile.email}</span>
             </div>

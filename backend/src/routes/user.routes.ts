@@ -4,6 +4,7 @@ import { requireAdmin, requireAuth, type AuthenticatedRequest } from '../middlew
 import type { LoginRequestBody, RefreshTokenRequestBody, SignupRequestBody } from '../types/auth.js';
 import type { UpdateUserRoleRequestBody } from '../types/profile.js';
 import { sendError } from '../utils/http.js';
+import { convertSupabaseUserToProfile } from '../utils/index.ts';
 
 const router = Router();
 
@@ -43,9 +44,13 @@ router.post('/signup', async (req, res) => {
     }
   }
 
+  if (!data.user) {
+    return sendError(res, 400, 'User data was not returned after signup.');
+  }
+
   return res.status(201).json({
     message: 'User created successfully.',
-    user: data.user,
+    user: convertSupabaseUserToProfile(data.user),
     session: data.session,
   });
 });
@@ -66,9 +71,13 @@ router.post('/login', async (req, res) => {
     return sendError(res, 401, error.message || 'Invalid credentials.');
   }
 
+  if (!data.user) {
+    return sendError(res, 401, 'User data was not returned after login.');
+  }
+
   return res.json({
     message: 'Login successful.',
-    user: data.user,
+    user: convertSupabaseUserToProfile(data.user),
     session: data.session,
   });
 });
@@ -109,12 +118,6 @@ router.patch('/:id/role', requireAuth, requireAdmin, async (req: AuthenticatedRe
   return res.json({
     message: 'User role updated successfully.',
     user: data,
-  });
-});
-
-router.get('/me', requireAuth, async (req: AuthenticatedRequest, res) => {
-  return res.json({
-    user: req.user,
   });
 });
 

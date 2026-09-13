@@ -26,11 +26,13 @@ export interface SoilReading {
   created_at: string;
 }
 
-export interface UserProfile {
+export type ProfileRole = "user" | "admin";
+
+export interface Profile {
   id: string;
+  name: string;
   email: string;
-  full_name: string | null;
-  avatar_url: string | null;
+  role: ProfileRole;
   created_at: string;
 }
 
@@ -45,7 +47,7 @@ export interface DashboardAlert {
 
 // Retorno do hook useDashboard
 export interface DashboardData {
-  profile: UserProfile;
+  profile: Profile | null;
   devices: Device[];
   readings: SoilReading[];
   alerts: DashboardAlert[];

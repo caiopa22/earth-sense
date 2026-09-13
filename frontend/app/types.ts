@@ -12,10 +12,11 @@ export type RegisterPayload = {
 export type AuthResponse = {
   message: string;
   user?: {
-    id?: string;
-    email?: string;
-    role?: string;
-    name?: string;
+    id: string;
+    email: string;
+    role: string;
+    name: string;
+    created_at: string;
   };
   session?: {
     access_token?: string;

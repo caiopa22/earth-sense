@@ -36,10 +36,27 @@ CREATE INDEX IF NOT EXISTS idx_soil_readings_device_created
 ON public.soil_readings(device_id, created_at DESC);
 
 -- ============================================================
--- 4. ROW LEVEL SECURITY (RLS) CONFIGURATION
+-- 4. PROFILES TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT NOT NULL,
+    name TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+    avatar TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Index for roles
+CREATE INDEX IF NOT EXISTS idx_profiles_role
+ON public.profiles(role);
+
+-- ============================================================
+-- 5. ROW LEVEL SECURITY (RLS) CONFIGURATION
 -- ============================================================
 ALTER TABLE public.devices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.soil_readings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Devices Policies
 CREATE POLICY "Users can view their own devices"
@@ -83,3 +100,20 @@ WITH CHECK (
         WHERE public.devices.id = public.soil_readings.device_id
     )
 );
+
+-- Profiles Policies
+CREATE POLICY "Users can view their own profile"
+ON public.profiles FOR SELECT
+TO authenticated
+USING (auth.uid() = id);
+
+CREATE POLICY "Users can insert their own profile"
+ON public.profiles FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users can update their own profile"
+ON public.profiles FOR UPDATE
+TO authenticated
+USING (auth.uid() = id)
+WITH CHECK (auth.uid() = id);

@@ -21,10 +21,10 @@ export const useAuthPage = () => {
 
     setProfile({
       id: user?.id ?? "",
-      name: user?.name ?? payload.email,
-      email: user?.email ?? payload.email,
+      name: user?.name ?? "",
+      email: user?.email ?? "",
       role: (user?.role as "user" | "admin") ?? "user",
-      created_at: new Date().toISOString(),
+      created_at: user?.created_at ?? "",
     });
 
     if (session) {

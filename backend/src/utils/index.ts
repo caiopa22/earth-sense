@@ -21,5 +21,6 @@ export const convertSupabaseUserToProfile = (user: User): Profile => {
       email: user.email ?? '',
       name: user.user_metadata?.name ?? 'User',
       role: (user.user_metadata?.role as Profile['role']) ?? 'user',
+      created_at: user.created_at ?? new Date().toISOString(),
   };
 } 

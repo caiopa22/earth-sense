@@ -11,6 +11,8 @@ const router = Router();
 router.post('/signup', async (req, res) => {
   const { email, password, name } = req.body as SignupRequestBody;
 
+  console.log('Signup request body:', req.body);
+
   if (!email || !password || !name) {
     return sendError(res, 400, 'Email, password, and name are required.');
   }

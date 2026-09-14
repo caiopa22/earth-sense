@@ -8,14 +8,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "~/contexts/auth-context";
 import { authService } from "~/service/auth";
+import { ENABLE_DEV_DATA_SOURCE_SWITCH, type DashboardDataSource } from "../hooks/useDashboard";
 import type { DashboardAlert, Profile } from "../types";
 
 interface HeaderProps {
   profile: Profile;
   alerts: DashboardAlert[];
+  dataSource: DashboardDataSource;
+  onToggleDataSource: (source: DashboardDataSource) => void;
 }
 
-export function Header({ profile, alerts }: HeaderProps) {
+export function Header({ profile, alerts, dataSource, onToggleDataSource }: HeaderProps) {
   const navigate = useNavigate();
   const { clearAuth } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
@@ -82,6 +85,17 @@ export function Header({ profile, alerts }: HeaderProps) {
     <>
       <header className="h-14 shrink-0 border-b border-border/60 flex items-center px-4 gap-3 bg-background/80 backdrop-blur-sm">
         <div className="flex-1" />
+
+        {ENABLE_DEV_DATA_SOURCE_SWITCH && (
+          <Button
+            variant={dataSource === "api" ? "default" : "outline"}
+            size="sm"
+            className="h-8 rounded-full text-[10px] font-medium px-3"
+            onClick={() => onToggleDataSource(dataSource === "api" ? "mock" : "api")}
+          >
+            {dataSource === "api" ? "API" : "Mocks"}
+          </Button>
+        )}
 
         {/* Notifications */}
         <Button variant="ghost" size="icon" className="relative rounded-full w-8 h-8">

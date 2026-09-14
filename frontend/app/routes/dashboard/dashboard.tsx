@@ -17,7 +17,6 @@ export function meta() {
 }
 
 export default function DashboardRoute() {
-
   const {
     profile,
     devices,
@@ -28,6 +27,8 @@ export default function DashboardRoute() {
     activePage,
     setActivePage,
     isAuthenticated,
+    dataSource,
+    setDataSource,
   } = useDashboard();
 
   if (!isAuthenticated || !profile) {
@@ -42,7 +43,12 @@ export default function DashboardRoute() {
       {/* Main */}
       <div className="flex flex-col flex-1 min-w-0">
         {/* Header */}
-        <Header profile={profile} alerts={alerts} />
+        <Header
+          profile={profile}
+          alerts={alerts}
+          dataSource={dataSource}
+          onToggleDataSource={setDataSource}
+        />
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">

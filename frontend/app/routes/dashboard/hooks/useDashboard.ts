@@ -19,12 +19,18 @@ import { api } from "~/lib/api";
 import { mockAlerts, mockDevices, mockReadings } from "../data/mock";
 import type { DashboardData } from "../types";
 
+export const ENABLE_DEV_DATA_SOURCE_SWITCH = import.meta.env.DEV;
+
+export type DashboardDataSource = "api" | "mock";
+
 export function useDashboard(): DashboardData & {
   selectedDeviceId: string;
   setSelectedDeviceId: (id: string) => void;
   activePage: DashboardPage;
   setActivePage: (page: DashboardPage) => void;
   isAuthenticated: boolean;
+  dataSource: DashboardDataSource;
+  setDataSource: (source: DashboardDataSource) => void;
 } {
   const navigate = useNavigate();
 
@@ -34,12 +40,35 @@ export function useDashboard(): DashboardData & {
   const [readings, setReadings] = useState(mockReadings);
   const [alerts, setAlerts] = useState(mockAlerts);
   const [isLoading, setIsLoading] = useState(true);
+  const [dataSource, setDataSourceState] = useState<DashboardDataSource>("api");
 
   const { profile, isAuthenticated } = useAuth();
+
+  const setDataSource = useCallback((source: DashboardDataSource) => {
+    setDataSourceState(source);
+
+    if (source === "mock") {
+      setDevices(mockDevices);
+      setReadings(mockReadings);
+      setAlerts(mockAlerts);
+      setSelectedDeviceId(mockDevices[0]?.id ?? "");
+      return;
+    }
+
+    setSelectedDeviceId(mockDevices[0]?.id ?? "");
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated || !profile) {
       navigate("/auth");
+      return;
+    }
+
+    if (dataSource === "mock") {
+      setDevices(mockDevices);
+      setReadings(mockReadings);
+      setAlerts(mockAlerts);
+      setIsLoading(false);
       return;
     }
 
@@ -52,8 +81,11 @@ export function useDashboard(): DashboardData & {
           api.get("/soil-readings"),
         ]);
 
-        setDevices(devicesRes.data.devices ?? mockDevices);
-        setReadings(readingsRes.data.readings ?? mockReadings);
+        const nextDevices = devicesRes.data.devices ?? mockDevices;
+        const nextReadings = readingsRes.data.readings ?? mockReadings;
+
+        setDevices(nextDevices);
+        setReadings(nextReadings);
         setAlerts(mockAlerts);
       } catch {
         setDevices(mockDevices);
@@ -65,7 +97,7 @@ export function useDashboard(): DashboardData & {
     };
 
     loadDashboard();
-  }, [profile?.id, isAuthenticated, navigate]);
+  }, [profile?.id, isAuthenticated, dataSource, navigate]);
 
   const handleSetPage = useCallback((page: DashboardPage) => {
     setActivePage(page);
@@ -82,6 +114,8 @@ export function useDashboard(): DashboardData & {
     activePage,
     setActivePage: handleSetPage,
     isAuthenticated,
+    dataSource,
+    setDataSource,
   };
 }
 

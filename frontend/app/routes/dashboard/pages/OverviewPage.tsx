@@ -1,10 +1,17 @@
-import { Droplets, Cpu, Activity, AlertTriangle } from "lucide-react";
-import { StatCard } from "../components/StatCard";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Activity, AlertTriangle, Cpu, Droplets } from "lucide-react";
+import { AlertsList } from "../components/AlertsList";
+import { DeviceList } from "../components/DeviceList";
+import { EarthAgentPreview } from "../components/EarthAgentPreview";
 import { HumidityGauge } from "../components/HumidityGauge";
 import { SoilChart } from "../components/SoilChart";
-import { DeviceList } from "../components/DeviceList";
-import { AlertsList } from "../components/AlertsList";
-import { EarthAgentPreview } from "../components/EarthAgentPreview";
+import { StatCard } from "../components/StatCard";
 import type { DashboardData, Device } from "../types";
 
 interface OverviewPageProps extends DashboardData {
@@ -34,6 +41,24 @@ export function OverviewPage({
   const selectedDevice: Device | undefined = devices.find((d) => d.id === selectedDeviceId);
   const selectedReadings = readings.filter((r) => r.device_id === selectedDeviceId);
   const currentHumidity = selectedDevice?.last_reading?.humidity_pct ?? 0;
+
+  if (devices.length === 0) {
+    return (
+      <div className="flex flex-col gap-6 p-6 min-h-0 overflow-y-auto">
+        <Empty className="min-h-[360px] border-border/60 bg-card/30">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Droplets className="w-5 h-5" />
+            </EmptyMedia>
+            <EmptyTitle>Seu painel ainda está vazio</EmptyTitle>
+          </EmptyHeader>
+          <EmptyDescription>
+            Registre o primeiro sensor para começar a acompanhar umidade, histórico e alertas.
+          </EmptyDescription>
+        </Empty>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6 p-6 min-h-0 overflow-y-auto">
@@ -74,24 +99,52 @@ export function OverviewPage({
         {/* Left — Gauge + Chart */}
         <div className="lg:col-span-2 flex flex-col gap-4">
           {/* Gauge + Chart card */}
-          <div className="rounded-2xl border border-border/60 bg-card p-5 flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col gap-0.5">
-                <h2 className="text-sm font-semibold text-foreground">Umidade Atual</h2>
-                <p className="text-xs text-muted-foreground">
-                  {selectedDevice?.name ?? "—"} · {selectedDevice?.location ?? ""}
-                </p>
+          {selectedDevice ? (
+            <div className="rounded-2xl border border-border/60 bg-card p-5 flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-0.5">
+                  <h2 className="text-sm font-semibold text-foreground">Umidade Atual</h2>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedDevice.name} · {selectedDevice.location ?? ""}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-              <HumidityGauge humidity={currentHumidity} className="shrink-0" />
-              <div className="flex-1 w-full">
-                <p className="text-xs text-muted-foreground mb-2">Histórico — últimas 24h</p>
-                <SoilChart readings={selectedReadings} />
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+                <HumidityGauge humidity={currentHumidity} className="shrink-0" />
+                <div className="flex-1 w-full">
+                  <p className="text-xs text-muted-foreground mb-2">Histórico — últimas 24h</p>
+                  {selectedReadings.length === 0 ? (
+                    <Empty className="min-h-[180px] border-border/60 bg-transparent">
+                      <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                          <Droplets className="w-5 h-5" />
+                        </EmptyMedia>
+                        <EmptyTitle>Sem leitura recente</EmptyTitle>
+                      </EmptyHeader>
+                      <EmptyDescription>
+                        O sensor ainda não enviou dados de umidade nas últimas 24 horas.
+                      </EmptyDescription>
+                    </Empty>
+                  ) : (
+                    <SoilChart readings={selectedReadings} />
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <Empty className="min-h-[240px] border-border/60 bg-card/30">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Droplets className="w-5 h-5" />
+                </EmptyMedia>
+                <EmptyTitle>Selecione um sensor</EmptyTitle>
+              </EmptyHeader>
+              <EmptyDescription>
+                Escolha um dispositivo na lista lateral para visualizar a umidade atual.
+              </EmptyDescription>
+            </Empty>
+          )}
 
           {/* Alerts */}
           <div className="rounded-2xl border border-border/60 bg-card p-5 flex flex-col gap-3">

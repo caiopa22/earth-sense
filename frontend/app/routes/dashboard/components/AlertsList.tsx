@@ -1,5 +1,12 @@
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { cn } from "cn";
-import { AlertTriangle, Info, XCircle } from "lucide-react";
+import { AlertTriangle, BellOff, Info, XCircle } from "lucide-react";
 import type { DashboardAlert } from "../types";
 
 interface AlertsListProps {
@@ -38,9 +45,17 @@ function timeAgo(iso: string): string {
 export function AlertsList({ alerts, className }: AlertsListProps) {
   if (alerts.length === 0) {
     return (
-      <div className="flex items-center justify-center py-8 text-xs text-muted-foreground">
-        Nenhum alerta no momento.
-      </div>
+      <Empty className="min-h-[180px] border-border/60 bg-transparent p-6">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <BellOff className="w-5 h-5" />
+          </EmptyMedia>
+          <EmptyTitle>Sem alertas no momento</EmptyTitle>
+        </EmptyHeader>
+        <EmptyDescription>
+          Quando houver algum problema de irrigação ou conexão, ele aparecerá aqui.
+        </EmptyDescription>
+      </Empty>
     );
   }
 

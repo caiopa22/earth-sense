@@ -1,13 +1,20 @@
-import { useState } from "react";
-import { Plus, MapPin, Wifi, WifiOff, Cpu } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
+import { Cpu, MapPin, Plus, Wifi, WifiOff } from "lucide-react";
+import { useState } from "react";
 import type { Device } from "../types";
-import { getSoilStatus, SOIL_STATUS_LABEL, SOIL_STATUS_COLOR } from "../types";
+import { getSoilStatus, SOIL_STATUS_COLOR, SOIL_STATUS_LABEL } from "../types";
 
 interface DevicesPageProps {
   devices: Device[];
@@ -58,73 +65,87 @@ export function DevicesPage({ devices }: DevicesPageProps) {
         </div>
 
         {/* Device Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {devices.map((device) => {
-            const humidity = device.last_reading?.humidity_pct ?? null;
-            const status = humidity !== null ? getSoilStatus(humidity) : null;
+        {devices.length === 0 ? (
+          <Empty className="min-h-[320px] border-border/60 bg-card/30">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Cpu className="w-5 h-5" />
+              </EmptyMedia>
+              <EmptyTitle>Nenhum sensor por aqui ainda</EmptyTitle>
+            </EmptyHeader>
+            <EmptyDescription>
+              Registre o seu primeiro dispositivo para começar a monitorar a umidade do solo.
+            </EmptyDescription>
+          </Empty>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {devices.map((device) => {
+              const humidity = device.last_reading?.humidity_pct ?? null;
+              const status = humidity !== null ? getSoilStatus(humidity) : null;
 
-            return (
-              <div
-                key={device.id}
-                className="rounded-2xl border border-border/60 bg-card p-5 flex flex-col gap-4"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-xl bg-primary/10">
-                      <Cpu className="w-4 h-4 text-primary" />
+              return (
+                <div
+                  key={device.id}
+                  className="rounded-2xl border border-border/60 bg-card p-5 flex flex-col gap-4"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-primary/10">
+                        <Cpu className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-sm font-semibold text-foreground">{device.name}</span>
+                        <span className="font-mono text-[10px] text-muted-foreground">
+                          {device.mac_address}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-sm font-semibold text-foreground">{device.name}</span>
-                      <span className="font-mono text-[10px] text-muted-foreground">
-                        {device.mac_address}
+                    <Badge
+                      variant="outline"
+                      className={
+                        device.is_online
+                          ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/8"
+                          : "border-border text-muted-foreground bg-muted/30"
+                      }
+                    >
+                      {device.is_online ? (
+                        <Wifi className="w-3 h-3 mr-1" />
+                      ) : (
+                        <WifiOff className="w-3 h-3 mr-1" />
+                      )}
+                      {device.is_online ? "Online" : "Offline"}
+                    </Badge>
+                  </div>
+
+                  {device.location && (
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <MapPin className="w-3.5 h-3.5 shrink-0" />
+                      {device.location}
+                    </div>
+                  )}
+
+                  {humidity !== null && status ? (
+                    <div className="flex items-center justify-between pt-1 border-t border-border/40">
+                      <span className="text-xs text-muted-foreground">Última leitura</span>
+                      <span className={`text-sm font-bold ${SOIL_STATUS_COLOR[status]}`}>
+                        {humidity.toFixed(1)}%
+                        <span className="text-xs font-normal text-muted-foreground ml-1">
+                          · {SOIL_STATUS_LABEL[status]}
+                        </span>
                       </span>
                     </div>
-                  </div>
-                  <Badge
-                    variant="outline"
-                    className={
-                      device.is_online
-                        ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/8"
-                        : "border-border text-muted-foreground bg-muted/30"
-                    }
-                  >
-                    {device.is_online ? (
-                      <Wifi className="w-3 h-3 mr-1" />
-                    ) : (
-                      <WifiOff className="w-3 h-3 mr-1" />
-                    )}
-                    {device.is_online ? "Online" : "Offline"}
-                  </Badge>
+                  ) : null}
+
+                  {device.last_seen && (
+                    <p className="text-[10px] text-muted-foreground/70">
+                      Visto: {timeAgo(device.last_seen)}
+                    </p>
+                  )}
                 </div>
-
-                {device.location && (
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <MapPin className="w-3.5 h-3.5 shrink-0" />
-                    {device.location}
-                  </div>
-                )}
-
-                {humidity !== null && status ? (
-                  <div className="flex items-center justify-between pt-1 border-t border-border/40">
-                    <span className="text-xs text-muted-foreground">Última leitura</span>
-                    <span className={`text-sm font-bold ${SOIL_STATUS_COLOR[status]}`}>
-                      {humidity.toFixed(1)}%
-                      <span className="text-xs font-normal text-muted-foreground ml-1">
-                        · {SOIL_STATUS_LABEL[status]}
-                      </span>
-                    </span>
-                  </div>
-                ) : null}
-
-                {device.last_seen && (
-                  <p className="text-[10px] text-muted-foreground/70">
-                    Visto: {timeAgo(device.last_seen)}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Register Device Modal */}

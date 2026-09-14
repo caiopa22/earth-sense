@@ -47,15 +47,14 @@ export function useDashboard(): DashboardData & {
       setIsLoading(true);
 
       try {
-        const [devicesRes, readingsRes, alertsRes] = await Promise.all([
+        const [devicesRes, readingsRes] = await Promise.all([
           api.get("/devices"),
           api.get("/soil-readings"),
-          api.get("/users/me"),
         ]);
 
         setDevices(devicesRes.data.devices ?? mockDevices);
         setReadings(readingsRes.data.readings ?? mockReadings);
-        setAlerts(alertsRes.data.alerts ?? mockAlerts);
+        setAlerts(mockAlerts);
       } catch {
         setDevices(mockDevices);
         setReadings(mockReadings);

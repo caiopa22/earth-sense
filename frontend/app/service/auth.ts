@@ -20,4 +20,10 @@ export const authService = {
     clearAuthSession();
     return data;
   },
+
+  deleteProfile: async () => {
+    const { data } = await api.delete<{ message: string }>("/users/me");
+    clearAuthSession();
+    return data;
+  },
 };

@@ -8,10 +8,37 @@ import { convertSupabaseUserToProfile } from '../utils/index.ts';
 
 const router = Router();
 
+router.get('/me', requireAuth, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user?.id;
+
+  if (!userId) {
+    return sendError(res, 401, 'Authentication required.');
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('profiles')
+    .select('id, email, name, role, avatar, created_at')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error) {
+    return sendError(res, 500, error.message || 'Unable to fetch user profile.');
+  }
+
+  const profile = data ?? {
+    id: userId,
+    email: req.user?.email ?? '',
+    name: req.user?.name ?? req.user?.email?.split('@')[0] ?? 'User',
+    role: req.user?.role ?? 'user',
+    avatar: req.user?.avatar ?? null,
+    created_at: new Date().toISOString(),
+  };
+
+  return res.json({ user: profile });
+});
+
 router.post('/signup', async (req, res) => {
   const { email, password, name } = req.body as SignupRequestBody;
-
-  console.log('Signup request body:', req.body);
 
   if (!email || !password || !name) {
     return sendError(res, 400, 'Email, password, and name are required.');
@@ -31,28 +58,34 @@ router.post('/signup', async (req, res) => {
     return sendError(res, 400, error.message || 'Unable to create user.');
   }
 
-  if (data.user) {
-    const { error: profileError } = await supabaseAdmin.from('profiles').upsert(
-      {
-        id: data.user.id,
-        email: data.user.email ?? email,
-        role: 'user',
-      },
-      { onConflict: 'id' },
-    );
-
-    if (profileError) {
-      return sendError(res, 500, profileError.message || 'Unable to create user profile.');
-    }
-  }
-
   if (!data.user) {
     return sendError(res, 400, 'User data was not returned after signup.');
   }
 
+  const { error: profileError } = await supabaseAdmin.from('profiles').upsert(
+    {
+      id: data.user.id,
+      email: data.user.email ?? email,
+      name,
+      role: 'user',
+      avatar: null,
+    },
+    { onConflict: 'id' },
+  );
+
+  if (profileError) {
+    return sendError(res, 500, profileError.message || 'Unable to create user profile.');
+  }
+
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('id, email, name, role, avatar, created_at')
+    .eq('id', data.user.id)
+    .maybeSingle();
+
   return res.status(201).json({
     message: 'User created successfully.',
-    user: convertSupabaseUserToProfile(data.user),
+    user: convertSupabaseUserToProfile(data.user, profile),
     session: data.session,
   });
 });
@@ -77,9 +110,15 @@ router.post('/login', async (req, res) => {
     return sendError(res, 401, 'User data was not returned after login.');
   }
 
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('id, email, name, role, avatar, created_at')
+    .eq('id', data.user.id)
+    .maybeSingle();
+
   return res.json({
     message: 'Login successful.',
-    user: convertSupabaseUserToProfile(data.user),
+    user: convertSupabaseUserToProfile(data.user, profile),
     session: data.session,
   });
 });
@@ -121,6 +160,31 @@ router.patch('/:id/role', requireAuth, requireAdmin, async (req: AuthenticatedRe
     message: 'User role updated successfully.',
     user: data,
   });
+});
+
+router.delete('/me', requireAuth, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user?.id;
+
+  if (!userId) {
+    return sendError(res, 401, 'Authentication required.');
+  }
+
+  const { error: profileDeleteError } = await supabaseAdmin
+    .from('profiles')
+    .delete()
+    .eq('id', userId);
+
+  if (profileDeleteError) {
+    return sendError(res, 500, profileDeleteError.message || 'Unable to delete profile data.');
+  }
+
+  const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+
+  if (error) {
+    return sendError(res, 500, error.message || 'Unable to delete account.');
+  }
+
+  return res.json({ message: 'User deleted successfully.' });
 });
 
 router.post('/logout', requireAuth, async (req: AuthenticatedRequest, res) => {

@@ -7,6 +7,8 @@ export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
     email?: string | null;
+    name?: string | null;
+    avatar?: string | null;
     role?: ProfileRole;
   };
 }
@@ -32,13 +34,15 @@ export async function requireAuth(
 
   const { data: profile, error: profileError } = await supabaseAdmin
     .from('profiles')
-    .select('role')
+    .select('name, email, role, avatar, created_at')
     .eq('id', data.user.id)
     .maybeSingle();
 
   req.user = {
     id: data.user.id,
-    email: data.user.email,
+    email: profile?.email ?? data.user.email,
+    name: profile?.name ?? data.user.user_metadata?.name ?? null,
+    avatar: profile?.avatar ?? data.user.user_metadata?.avatar ?? null,
     role: profileError || !profile ? 'user' : (profile.role as ProfileRole),
   };
 

@@ -1,3 +1,5 @@
+import type { Profile, ProfileRole } from "~/routes/dashboard/types";
+
 export type LoginPayload = {
   email: string;
   password: string;
@@ -9,15 +11,11 @@ export type RegisterPayload = {
   password: string;
 };
 
+export type { Profile, ProfileRole };
+
 export type AuthResponse = {
   message: string;
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-    name: string;
-    created_at: string;
-  };
+  user?: Profile;
   session?: {
     access_token?: string;
     refresh_token?: string;

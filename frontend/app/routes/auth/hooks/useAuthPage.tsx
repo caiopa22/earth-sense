@@ -23,8 +23,9 @@ export const useAuthPage = () => {
       id: user?.id ?? "",
       name: user?.name ?? "",
       email: user?.email ?? "",
-      role: (user?.role as "user" | "admin") ?? "user",
-      created_at: user?.created_at ?? "",
+      role: user?.role ?? "user",
+      avatar: user?.avatar ?? null,
+      created_at: user?.created_at ?? new Date().toISOString(),
     });
 
     if (session) {
@@ -50,8 +51,9 @@ export const useAuthPage = () => {
       id: user?.id ?? "",
       name: user?.name ?? payload.email,
       email: user?.email ?? payload.email,
-      role: (user?.role as "user" | "admin") ?? "user",
-      created_at: new Date().toISOString(),
+      role: user?.role ?? "user",
+      avatar: user?.avatar ?? null,
+      created_at: user?.created_at ?? new Date().toISOString(),
     });
 
     if (session) {

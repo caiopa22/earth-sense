@@ -15,12 +15,16 @@ export const getAuthenticatedUserId = (req: AuthenticatedRequest, res: Response)
   return userId;
 };
 
-export const convertSupabaseUserToProfile = (user: User): Profile => {
+export const convertSupabaseUserToProfile = (
+  user: User,
+  profile?: Partial<Profile> | null,
+): Profile => {
   return {
-      ...user,
-      email: user.email ?? '',
-      name: user.user_metadata?.name ?? 'User',
-      role: (user.user_metadata?.role as Profile['role']) ?? 'user',
-      created_at: user.created_at ?? new Date().toISOString(),
+    id: user.id,
+    email: profile?.email ?? user.email ?? '',
+    name: profile?.name ?? user.user_metadata?.name ?? user.email?.split('@')[0] ?? 'User',
+    role: (profile?.role ?? user.user_metadata?.role ?? 'user') as Profile['role'],
+    avatar: profile?.avatar ?? user.user_metadata?.avatar ?? null,
+    created_at: profile?.created_at ?? user.created_at ?? new Date().toISOString(),
   };
-} 
+};

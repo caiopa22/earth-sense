@@ -1,5 +1,5 @@
 import { cn } from "cn";
-import { LayoutDashboard, Cpu, Clock, Sparkles } from "lucide-react";
+import { Clock, Cpu, LayoutDashboard, Sparkles } from "lucide-react";
 import Logo from "~/components/ui/logo";
 import type { DashboardPage } from "../hooks/useDashboard";
 
@@ -20,7 +20,7 @@ export function Sidebar({ activePage, onNavigate }: SidebarProps) {
     <aside className="w-56 shrink-0 border-r border-border/60 flex flex-col bg-background/80 backdrop-blur-sm h-full">
       {/* Logo */}
       <div className="h-14 flex items-center px-4 border-b border-border/60">
-        <Logo className="h-6" />
+        <Logo className="h-12" />
       </div>
 
       {/* Navigation */}

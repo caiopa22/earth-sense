@@ -70,6 +70,9 @@ web_modules/
 .env.*
 !.env.example
 
+# Arduino local secrets
+arduino_secrets.h
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
@@ -144,3 +147,4 @@ vite.config.ts.timestamp-*
 
 TCC.txt
 GEMINI.md
+docs

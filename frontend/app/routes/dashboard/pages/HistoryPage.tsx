@@ -20,12 +20,19 @@ interface HistoryPageProps {
 
 export function HistoryPage({ devices, readings }: HistoryPageProps) {
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>(devices[0]?.id ?? "");
+  const [selectedSensorIndex, setSelectedSensorIndex] = useState<number | "all">("all");
 
   const deviceReadings = readings
     .filter((r) => r.device_id === selectedDeviceId)
+    .filter((r) => selectedSensorIndex === "all" || r.sensor_index === selectedSensorIndex)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const selectedDevice = devices.find((d) => d.id === selectedDeviceId);
+  const sensorIndexes = Array.from(
+    new Set(
+      readings.filter((r) => r.device_id === selectedDeviceId).map((r) => r.sensor_index ?? 1),
+    ),
+  ).sort((a, b) => a - b);
 
   if (devices.length === 0) {
     return (
@@ -35,7 +42,7 @@ export function HistoryPage({ devices, readings }: HistoryPageProps) {
           <p className="text-xs text-muted-foreground">Últimas 24 horas por sensor</p>
         </div>
 
-        <Empty className="min-h-[360px] border-border/60 bg-card/30">
+        <Empty className="min-h-90 border-border/60 bg-card/30">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <Droplets className="w-5 h-5" />
@@ -75,9 +82,37 @@ export function HistoryPage({ devices, readings }: HistoryPageProps) {
         ))}
       </div>
 
+      <div className="flex items-center gap-2 flex-wrap">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setSelectedSensorIndex("all")}
+          className={cn(
+            "rounded-full h-8 text-xs",
+            selectedSensorIndex === "all" && "bg-primary/10 border-primary/40 text-primary",
+          )}
+        >
+          Todos os sensores
+        </Button>
+        {sensorIndexes.map((sensorIndex) => (
+          <Button
+            key={sensorIndex}
+            variant="outline"
+            size="sm"
+            onClick={() => setSelectedSensorIndex(sensorIndex)}
+            className={cn(
+              "rounded-full h-8 text-xs",
+              selectedSensorIndex === sensorIndex && "bg-primary/10 border-primary/40 text-primary",
+            )}
+          >
+            Sensor {sensorIndex}
+          </Button>
+        ))}
+      </div>
+
       {/* Chart */}
       {deviceReadings.length === 0 ? (
-        <Empty className="min-h-[220px] border-border/60 bg-card/30">
+        <Empty className="min-h-55 border-border/60 bg-card/30">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <Droplets className="w-5 h-5" />
@@ -114,6 +149,9 @@ export function HistoryPage({ devices, readings }: HistoryPageProps) {
                       Data / Hora
                     </th>
                     <th className="text-left px-4 py-2.5 text-muted-foreground font-medium">
+                      Sensor
+                    </th>
+                    <th className="text-left px-4 py-2.5 text-muted-foreground font-medium">
                       Umidade
                     </th>
                     <th className="text-left px-4 py-2.5 text-muted-foreground font-medium">
@@ -139,6 +177,9 @@ export function HistoryPage({ devices, readings }: HistoryPageProps) {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
+                        </td>
+                        <td className="px-4 py-2.5 text-muted-foreground">
+                          Sensor {r.sensor_index ?? 1}
                         </td>
                         <td
                           className={cn(

@@ -1,3 +1,13 @@
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -11,13 +21,30 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
-import { Cpu, MapPin, Plus, Wifi, WifiOff } from "lucide-react";
+import axios from "axios";
+import { Cpu, MapPin, Pencil, Plus, Trash2, Wifi, WifiOff } from "lucide-react";
 import { useState } from "react";
 import type { Device } from "../types";
 import { getSoilStatus, SOIL_STATUS_COLOR, SOIL_STATUS_LABEL } from "../types";
 
 interface DevicesPageProps {
   devices: Device[];
+  onCreateDevice: (payload: {
+    name: string;
+    mac_address: string;
+    location?: string;
+    sensor_count: number;
+  }) => Promise<void>;
+  onUpdateDevice: (
+    id: string,
+    payload: {
+      name: string;
+      mac_address: string;
+      location?: string;
+      sensor_count: number;
+    },
+  ) => Promise<void>;
+  onDeleteDevice: (id: string) => Promise<void>;
 }
 
 function timeAgo(iso: string): string {
@@ -27,20 +54,105 @@ function timeAgo(iso: string): string {
   return `${Math.floor(diff / 3600)}h atrás`;
 }
 
-export function DevicesPage({ devices }: DevicesPageProps) {
+export function DevicesPage({
+  devices,
+  onCreateDevice,
+  onUpdateDevice,
+  onDeleteDevice,
+}: DevicesPageProps) {
   const [registerOpen, setRegisterOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: "", mac_address: "", location: "" });
+  const [editingDevice, setEditingDevice] = useState<Device | null>(null);
+  const [deletingDevice, setDeletingDevice] = useState<Device | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    mac_address: "",
+    location: "",
+    sensor_count: "1",
+  });
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: POST /api/devices com formData
-    toast.add({
-      title: "Dispositivo registrado",
-      description: `${formData.name} foi adicionado com sucesso.`,
-      type: "success",
+  const isEditing = editingDevice !== null;
+
+  const openCreate = () => {
+    setEditingDevice(null);
+    setFormData({ name: "", mac_address: "", location: "", sensor_count: "1" });
+    setRegisterOpen(true);
+  };
+
+  const openEdit = (device: Device) => {
+    setEditingDevice(device);
+    setFormData({
+      name: device.name,
+      mac_address: device.mac_address,
+      location: device.location ?? "",
+      sensor_count: String(device.sensor_count ?? 1),
     });
-    setRegisterOpen(false);
-    setFormData({ name: "", mac_address: "", location: "" });
+    setRegisterOpen(true);
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        mac_address: formData.mac_address.trim(),
+        location: formData.location.trim() || undefined,
+        sensor_count: Number(formData.sensor_count),
+      };
+
+      if (editingDevice) {
+        await onUpdateDevice(editingDevice.id, payload);
+      } else {
+        await onCreateDevice(payload);
+      }
+      toast.add({
+        title: editingDevice ? "Dispositivo atualizado" : "Dispositivo registrado",
+        description: `${formData.name} foi salvo com sucesso.`,
+        type: "success",
+      });
+      setRegisterOpen(false);
+      setFormData({ name: "", mac_address: "", location: "", sensor_count: "1" });
+      setEditingDevice(null);
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.error
+        : "Não foi possível registrar o dispositivo.";
+      toast.add({
+        title: "Falha ao registrar",
+        description: message ?? "Verifique os dados e tente novamente.",
+        type: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingDevice) return;
+
+    setIsSubmitting(true);
+    try {
+      await onDeleteDevice(deletingDevice.id);
+      toast.add({
+        title: "Dispositivo excluído",
+        description: `${deletingDevice.name} e suas leituras foram removidos.`,
+        type: "success",
+      });
+      setDeletingDevice(null);
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.error
+        : "Não foi possível excluir o dispositivo.";
+      toast.add({
+        title: "Falha ao excluir",
+        description: message ?? "Tente novamente.",
+        type: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -51,14 +163,11 @@ export function DevicesPage({ devices }: DevicesPageProps) {
           <div className="flex flex-col gap-0.5">
             <h1 className="text-lg font-semibold text-foreground">Dispositivos</h1>
             <p className="text-xs text-muted-foreground">
-              {devices.length} sensor{devices.length !== 1 ? "es" : ""} registrado
+              {devices.length} dispositivo{devices.length !== 1 ? "s" : ""} registrado
               {devices.length !== 1 ? "s" : ""}
             </p>
           </div>
-          <Button
-            className="rounded-full gap-1.5 text-xs h-8"
-            onClick={() => setRegisterOpen(true)}
-          >
+          <Button className="rounded-full gap-1.5 text-xs h-8" onClick={openCreate}>
             <Plus className="w-3.5 h-3.5" />
             Registrar sensor
           </Button>
@@ -66,7 +175,7 @@ export function DevicesPage({ devices }: DevicesPageProps) {
 
         {/* Device Grid */}
         {devices.length === 0 ? (
-          <Empty className="min-h-[320px] border-border/60 bg-card/30">
+          <Empty className="min-h-80 border-border/60 bg-card/30">
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <Cpu className="w-5 h-5" />
@@ -100,21 +209,42 @@ export function DevicesPage({ devices }: DevicesPageProps) {
                         </span>
                       </div>
                     </div>
-                    <Badge
-                      variant="outline"
-                      className={
-                        device.is_online
-                          ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/8"
-                          : "border-border text-muted-foreground bg-muted/30"
-                      }
-                    >
-                      {device.is_online ? (
-                        <Wifi className="w-3 h-3 mr-1" />
-                      ) : (
-                        <WifiOff className="w-3 h-3 mr-1" />
-                      )}
-                      {device.is_online ? "Online" : "Offline"}
-                    </Badge>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Badge
+                        variant="outline"
+                        className={
+                          device.is_online
+                            ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/8"
+                            : "border-border text-muted-foreground bg-muted/30"
+                        }
+                      >
+                        {device.is_online ? (
+                          <Wifi className="w-3 h-3 mr-1" />
+                        ) : (
+                          <WifiOff className="w-3 h-3 mr-1" />
+                        )}
+                        {device.is_online ? "Online" : "Offline"}
+                      </Badge>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Editar ${device.name}`}
+                        onClick={() => openEdit(device)}
+                      >
+                        <Pencil />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Excluir ${device.name}`}
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => setDeletingDevice(device)}
+                      >
+                        <Trash2 />
+                      </Button>
+                    </div>
                   </div>
 
                   {device.location && (
@@ -152,7 +282,9 @@ export function DevicesPage({ devices }: DevicesPageProps) {
       <Dialog open={registerOpen} onOpenChange={setRegisterOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-base">Registrar novo sensor</DialogTitle>
+            <DialogTitle className="text-base">
+              {isEditing ? "Editar dispositivo" : "Registrar novo sensor"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleRegister} className="flex flex-col gap-4 mt-1">
             <div className="space-y-1.5">
@@ -167,6 +299,24 @@ export function DevicesPage({ devices }: DevicesPageProps) {
                 placeholder="Ex: Sensor Talhão C"
                 value={formData.name}
                 onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+                required
+                className="rounded-full"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="dev-sensor-count"
+                className="text-xs text-muted-foreground uppercase tracking-wider font-mono"
+              >
+                Quantidade de sensores
+              </Label>
+              <Input
+                id="dev-sensor-count"
+                type="number"
+                min={1}
+                max={32}
+                value={formData.sensor_count}
+                onChange={(e) => setFormData((p) => ({ ...p, sensor_count: e.target.value }))}
                 required
                 className="rounded-full"
               />
@@ -199,6 +349,7 @@ export function DevicesPage({ devices }: DevicesPageProps) {
                 placeholder="Ex: Talhão D — Trigo"
                 value={formData.location}
                 onChange={(e) => setFormData((p) => ({ ...p, location: e.target.value }))}
+                required
                 className="rounded-full"
               />
             </div>
@@ -211,13 +362,37 @@ export function DevicesPage({ devices }: DevicesPageProps) {
               >
                 Cancelar
               </Button>
-              <Button type="submit" className="flex-1 rounded-full">
-                Registrar
+              <Button type="submit" className="flex-1 rounded-full" disabled={isSubmitting}>
+                {isSubmitting ? "Salvando..." : isEditing ? "Salvar alterações" : "Registrar"}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={deletingDevice !== null}
+        onOpenChange={(open) => !open && setDeletingDevice(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir dispositivo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deletingDevice?.name} e todas as leituras associadas serão removidos permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSubmitting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isSubmitting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/80"
+              onClick={handleDelete}
+            >
+              {isSubmitting ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

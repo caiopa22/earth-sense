@@ -11,6 +11,7 @@ export interface Device {
   name: string;
   mac_address: string;
   location: string | null;
+  sensor_count?: number;
   created_at: string;
   // Campos derivados/calculados no frontend
   is_online?: boolean;
@@ -23,6 +24,9 @@ export interface SoilReading {
   device_id: string;
   humidity_pct: number; // 0–100
   raw_value: number | null; // valor ADC bruto do ESP32
+  sensor_index: number;
+  batch_id?: string;
+  sampled_at?: string | null;
   created_at: string;
 }
 

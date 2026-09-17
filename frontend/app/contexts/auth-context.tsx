@@ -1,4 +1,11 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { api, API_URL } from "~/lib/api";
+import {
+  clearAuthSession,
+  getAccessToken,
+  getRefreshToken,
+  refreshAccessToken,
+} from "~/lib/session";
 import type { Profile } from "~/routes/dashboard/types";
 
 export type AuthSession = {
@@ -25,7 +32,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [token, setTokenState] = useState<string | null>(null);
   const [refreshToken, setRefreshTokenState] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const restoreSession = async () => {
+      if (typeof window === "undefined") return;
+
+      setIsLoading(true);
+
+      try {
+        let accessToken = getAccessToken();
+
+        if (!accessToken && getRefreshToken()) {
+          accessToken = await refreshAccessToken(API_URL);
+        }
+
+        if (!accessToken) {
+          if (!cancelled) clearAuth();
+          return;
+        }
+
+        setTokenState(accessToken);
+        setRefreshTokenState(getRefreshToken());
+        const { data } = await api.get<{ user: Profile }>("/users/me");
+
+        if (!cancelled && data.user) {
+          setProfile(data.user);
+        }
+      } catch {
+        clearAuthSession();
+        if (!cancelled) clearAuth();
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+
+    restoreSession();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const setToken = (nextToken: string | null) => {
     setTokenState(nextToken);

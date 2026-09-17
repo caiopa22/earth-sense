@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   isRouteErrorResponse,
   Links,
@@ -45,6 +46,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const isDark = savedTheme === "dark" || (savedTheme !== "light" && prefersDark);
+
+    document.documentElement.classList.toggle("dark", isDark);
+    document.documentElement.style.colorScheme = isDark ? "dark" : "light";
+  }, []);
+
   return (
     <AuthProvider>
       <DashboardProvider>

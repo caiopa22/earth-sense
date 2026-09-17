@@ -1,3 +1,5 @@
+import Logo from "~/components/ui/logo";
+import { Spinner } from "~/components/ui/spinner";
 import { Header } from "~/routes/dashboard/components/Header";
 import { Sidebar } from "~/routes/dashboard/components/Sidebar";
 import { useDashboard } from "~/routes/dashboard/hooks/useDashboard";
@@ -16,6 +18,26 @@ export function meta() {
   ];
 }
 
+function DashboardLoading() {
+  return (
+    <main className="flex min-h-screen items-center justify-center overflow-hidden bg-background px-6 text-foreground">
+      <div className="flex w-full max-w-xs flex-col items-center gap-6 text-center">
+        <div className="relative flex size-20 items-center justify-center rounded-3xl border border-primary/20 bg-primary/10 shadow-lg shadow-primary/10">
+          <div className="absolute inset-0 animate-ping rounded-3xl bg-primary/10" />
+          <Logo className="relative h-12 w-12 object-cover object-left" />
+        </div>
+        <div className="flex flex-col items-center gap-3">
+          <p className="text-sm font-semibold tracking-tight">Preparando seu painel</p>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Spinner className="size-3.5 text-primary" />
+            <span>Sincronizando seus sensores...</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
 export default function DashboardRoute() {
   const {
     profile,
@@ -27,9 +49,17 @@ export default function DashboardRoute() {
     activePage,
     setActivePage,
     isAuthenticated,
+    isLoading,
     dataSource,
     setDataSource,
+    createDevice,
+    updateDevice,
+    deleteDevice,
   } = useDashboard();
+
+  if (isLoading) {
+    return <DashboardLoading />;
+  }
 
   if (!isAuthenticated || !profile) {
     return null;
@@ -63,7 +93,14 @@ export default function DashboardRoute() {
               setSelectedDeviceId={setSelectedDeviceId}
             />
           )}
-          {activePage === "devices" && <DevicesPage devices={devices} />}
+          {activePage === "devices" && (
+            <DevicesPage
+              devices={devices}
+              onCreateDevice={createDevice}
+              onUpdateDevice={updateDevice}
+              onDeleteDevice={deleteDevice}
+            />
+          )}
           {activePage === "history" && <HistoryPage devices={devices} readings={readings} />}
           {activePage === "agent" && <EarthAgentPage />}
         </main>

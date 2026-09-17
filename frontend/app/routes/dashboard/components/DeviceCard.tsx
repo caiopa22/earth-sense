@@ -1,7 +1,7 @@
 import { cn } from "cn";
 import { MapPin, Wifi, WifiOff } from "lucide-react";
 import type { Device } from "../types";
-import { getSoilStatus, SOIL_STATUS_LABEL, SOIL_STATUS_COLOR, SOIL_STATUS_BG } from "../types";
+import { getSoilStatus, SOIL_STATUS_BG, SOIL_STATUS_COLOR, SOIL_STATUS_LABEL } from "../types";
 
 interface DeviceCardProps {
   device: Device;
@@ -42,6 +42,9 @@ export function DeviceCard({ device, isSelected, onClick }: DeviceCardProps) {
               {device.location}
             </span>
           )}
+          <span className="text-[10px] text-muted-foreground">
+            {device.sensor_count ?? 1} {(device.sensor_count ?? 1) === 1 ? "sensor" : "sensores"}
+          </span>
         </div>
 
         <span

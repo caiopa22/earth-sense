@@ -41,21 +41,11 @@ export interface Profile {
   created_at: string;
 }
 
-export interface DashboardAlert {
-  id: string;
-  device_id: string;
-  device_name: string;
-  severity: "critical" | "warning" | "info";
-  message: string;
-  created_at: string;
-}
-
 // Retorno do hook useDashboard
 export interface DashboardData {
   profile: Profile | null;
   devices: Device[];
   readings: SoilReading[];
-  alerts: DashboardAlert[];
   isLoading: boolean;
 }
 

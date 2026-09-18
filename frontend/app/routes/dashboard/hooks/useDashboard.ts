@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "~/contexts/auth-context";
 import { api } from "~/lib/api";
-import { mockAlerts, mockDevices, mockReadings } from "../data/mock";
+import { mockDevices, mockReadings } from "../data/mock";
 import type { DashboardData, Device, SoilReading } from "../types";
 
 export const ENABLE_DEV_DATA_SOURCE_SWITCH = import.meta.env.DEV;
@@ -57,7 +57,6 @@ export function useDashboard(): DashboardData & {
   const [activePage, setActivePage] = useState<DashboardPage>("overview");
   const [devices, setDevices] = useState(enrichDevices(mockDevices, mockReadings));
   const [readings, setReadings] = useState(mockReadings);
-  const [alerts, setAlerts] = useState(mockAlerts);
   const [isLoading, setIsLoading] = useState(true);
   const [dataSource, setDataSourceState] = useState<DashboardDataSource>("api");
 
@@ -69,7 +68,6 @@ export function useDashboard(): DashboardData & {
     if (source === "mock") {
       setDevices(enrichDevices(mockDevices, mockReadings));
       setReadings(mockReadings);
-      setAlerts(mockAlerts);
       setSelectedDeviceId(mockDevices[0]?.id ?? "");
       return;
     }
@@ -92,7 +90,6 @@ export function useDashboard(): DashboardData & {
 
       setDevices(enrichedDevices);
       setReadings(nextReadings);
-      setAlerts(mockAlerts);
       setSelectedDeviceId((current) =>
         enrichedDevices.some((device) => device.id === current)
           ? current
@@ -101,7 +98,6 @@ export function useDashboard(): DashboardData & {
     } catch {
       setDevices([]);
       setReadings([]);
-      setAlerts([]);
       setSelectedDeviceId("");
     } finally {
       setIsLoading(false);
@@ -158,7 +154,6 @@ export function useDashboard(): DashboardData & {
     if (dataSource === "mock") {
       setDevices(enrichDevices(mockDevices, mockReadings));
       setReadings(mockReadings);
-      setAlerts(mockAlerts);
       setIsLoading(false);
       return;
     }
@@ -174,7 +169,6 @@ export function useDashboard(): DashboardData & {
     profile,
     devices,
     readings,
-    alerts,
     isLoading,
     selectedDeviceId,
     setSelectedDeviceId,

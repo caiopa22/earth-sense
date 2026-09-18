@@ -3,29 +3,26 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/toast";
-import { Bell, LogOut, Settings, Trash2 } from "lucide-react";
+import { LogOut, Settings, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "~/contexts/auth-context";
 import { authService } from "~/service/auth";
 import { ENABLE_DEV_DATA_SOURCE_SWITCH, type DashboardDataSource } from "../hooks/useDashboard";
-import type { DashboardAlert, Profile } from "../types";
+import type { Profile } from "../types";
 
 interface HeaderProps {
   profile: Profile;
-  alerts: DashboardAlert[];
   dataSource: DashboardDataSource;
   onToggleDataSource: (source: DashboardDataSource) => void;
 }
 
-export function Header({ profile, alerts, dataSource, onToggleDataSource }: HeaderProps) {
+export function Header({ profile, dataSource, onToggleDataSource }: HeaderProps) {
   const navigate = useNavigate();
   const { clearAuth } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-
-  const unreadAlerts = alerts.filter((a) => a.severity === "critical").length;
 
   const handleLogout = async () => {
     setLogoutOpen(false);
@@ -96,16 +93,6 @@ export function Header({ profile, alerts, dataSource, onToggleDataSource }: Head
             {dataSource === "api" ? "API" : "Mocks"}
           </Button>
         )}
-
-        {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative rounded-full w-8 h-8">
-          <Bell className="w-4 h-4" />
-          {unreadAlerts > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-red-500 text-[9px] text-white flex items-center justify-center font-bold">
-              {unreadAlerts}
-            </span>
-          )}
-        </Button>
 
         <ThemeToggle className="rounded-full w-8 h-8" />
 

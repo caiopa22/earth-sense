@@ -43,7 +43,6 @@ export default function DashboardRoute() {
     profile,
     devices,
     readings,
-    alerts,
     selectedDeviceId,
     setSelectedDeviceId,
     activePage,
@@ -73,12 +72,7 @@ export default function DashboardRoute() {
       {/* Main */}
       <div className="flex flex-col flex-1 min-w-0">
         {/* Header */}
-        <Header
-          profile={profile}
-          alerts={alerts}
-          dataSource={dataSource}
-          onToggleDataSource={setDataSource}
-        />
+        <Header profile={profile} dataSource={dataSource} onToggleDataSource={setDataSource} />
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">
@@ -87,10 +81,10 @@ export default function DashboardRoute() {
               profile={profile}
               devices={devices}
               readings={readings}
-              alerts={alerts}
               isLoading={false}
               selectedDeviceId={selectedDeviceId}
               setSelectedDeviceId={setSelectedDeviceId}
+              onOpenAgent={() => setActivePage("agent")}
             />
           )}
           {activePage === "devices" && (

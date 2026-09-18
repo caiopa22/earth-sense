@@ -1,6 +1,5 @@
-import { Sparkles, MessageSquare, BarChart2, Leaf } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { BarChart2, Leaf, MessageSquare, Sparkles } from "lucide-react";
 
 const capabilities = [
   {
@@ -20,7 +19,7 @@ const capabilities = [
   },
 ];
 
-export function EarthAgentPreview() {
+export function EarthAgentPreview({ onOpen }: { onOpen: () => void }) {
   return (
     <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/3 p-6 flex flex-col gap-5">
       {/* Header */}
@@ -31,9 +30,6 @@ export function EarthAgentPreview() {
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-foreground">Earth Agent</span>
-            <Badge variant="outline" className="text-xs px-1.5 py-0 border-primary/30 text-primary">
-              Em breve
-            </Badge>
           </div>
           <span className="text-xs text-muted-foreground">Agente de IA para análise de solo</span>
         </div>
@@ -54,11 +50,10 @@ export function EarthAgentPreview() {
         ))}
       </div>
 
-      {/* CTA desabilitado */}
       <Button
         variant="outline"
-        disabled
-        className="w-full rounded-full border-primary/30 text-primary/60 text-xs cursor-not-allowed"
+        className="w-full rounded-full border-primary/30 text-primary text-xs"
+        onClick={onOpen}
       >
         <Sparkles className="w-3.5 h-3.5 mr-1.5" />
         Conversar com o Earth Agent

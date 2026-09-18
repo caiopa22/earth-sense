@@ -9,7 +9,7 @@
 // Os tipos estão em: app/dashboard/types/index.ts
 // ─────────────────────────────────────────────────────────────────────────────
 
-import type { DashboardAlert, Device, Profile, SoilReading } from "../types";
+import type { Device, Profile, SoilReading } from "../types";
 
 // ── Perfil do usuário ─────────────────────────────────────────────────────────
 export const mockProfile: Profile = {
@@ -96,31 +96,3 @@ mockDevices.forEach((device) => {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   device.last_reading = deviceReadings[0] ?? null;
 });
-
-// ── Alertas ───────────────────────────────────────────────────────────────────
-export const mockAlerts: DashboardAlert[] = [
-  {
-    id: "alert_001",
-    device_id: "dev_mock_002",
-    device_name: "Sensor Talhão B",
-    severity: "critical",
-    message: "Umidade abaixo de 35% — risco de déficit hídrico no Talhão B.",
-    created_at: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-  },
-  {
-    id: "alert_002",
-    device_id: "dev_mock_003",
-    device_name: "Sensor Estufa",
-    severity: "warning",
-    message: "Dispositivo offline há mais de 3 horas.",
-    created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: "alert_003",
-    device_id: "dev_mock_001",
-    device_name: "Sensor Talhão A",
-    severity: "info",
-    message: "Umidade ótima mantida nas últimas 6 horas.",
-    created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-  },
-];

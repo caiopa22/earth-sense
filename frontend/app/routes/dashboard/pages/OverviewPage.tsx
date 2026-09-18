@@ -5,8 +5,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Activity, AlertTriangle, Cpu, Droplets } from "lucide-react";
-import { AlertsList } from "../components/AlertsList";
+import { Activity, Cpu, Droplets } from "lucide-react";
 import { DeviceList } from "../components/DeviceList";
 import { EarthAgentPreview } from "../components/EarthAgentPreview";
 import { HumidityGauge } from "../components/HumidityGauge";
@@ -17,14 +16,15 @@ import type { DashboardData, Device } from "../types";
 interface OverviewPageProps extends DashboardData {
   selectedDeviceId: string;
   setSelectedDeviceId: (id: string) => void;
+  onOpenAgent: () => void;
 }
 
 export function OverviewPage({
   devices,
   readings,
-  alerts,
   selectedDeviceId,
   setSelectedDeviceId,
+  onOpenAgent,
 }: OverviewPageProps) {
   const onlineDevices = devices.filter((d) => d.is_online).length;
 
@@ -36,8 +36,6 @@ export function OverviewPage({
       ? allLatestHumidity.reduce((a, b) => a + b, 0) / allLatestHumidity.length
       : 0;
 
-  const criticalAlerts = alerts.filter((a) => a.severity === "critical").length;
-
   const selectedDevice: Device | undefined = devices.find((d) => d.id === selectedDeviceId);
   const selectedReadings = readings.filter((r) => r.device_id === selectedDeviceId);
   const currentHumidity = selectedDevice?.last_reading?.humidity_pct ?? 0;
@@ -45,7 +43,7 @@ export function OverviewPage({
   if (devices.length === 0) {
     return (
       <div className="flex flex-col gap-6 p-6 min-h-0 overflow-y-auto">
-        <Empty className="min-h-[360px] border-border/60 bg-card/30">
+        <Empty className="min-h-90 border-border/60 bg-card/30">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <Droplets className="w-5 h-5" />
@@ -53,7 +51,7 @@ export function OverviewPage({
             <EmptyTitle>Seu painel ainda está vazio</EmptyTitle>
           </EmptyHeader>
           <EmptyDescription>
-            Registre o primeiro sensor para começar a acompanhar umidade, histórico e alertas.
+            Registre o primeiro sensor para começar a acompanhar a umidade e o histórico.
           </EmptyDescription>
         </Empty>
       </div>
@@ -63,7 +61,7 @@ export function OverviewPage({
   return (
     <div className="flex flex-col gap-6 p-6 min-h-0 overflow-y-auto">
       {/* KPI Row */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
         <StatCard
           title="Umidade Média"
           value={avgHumidity.toFixed(0)}
@@ -84,13 +82,6 @@ export function OverviewPage({
           icon={Activity}
           trend="Sensor selecionado"
           trendUp
-        />
-        <StatCard
-          title="Alertas Críticos"
-          value={criticalAlerts}
-          icon={AlertTriangle}
-          trend={criticalAlerts === 0 ? "Nenhum alerta" : "Requer atenção"}
-          trendUp={criticalAlerts === 0}
         />
       </div>
 
@@ -115,7 +106,7 @@ export function OverviewPage({
                 <div className="flex-1 w-full">
                   <p className="text-xs text-muted-foreground mb-2">Histórico — últimas 24h</p>
                   {selectedReadings.length === 0 ? (
-                    <Empty className="min-h-[180px] border-border/60 bg-transparent">
+                    <Empty className="min-h-45 border-border/60 bg-transparent">
                       <EmptyHeader>
                         <EmptyMedia variant="icon">
                           <Droplets className="w-5 h-5" />
@@ -133,7 +124,7 @@ export function OverviewPage({
               </div>
             </div>
           ) : (
-            <Empty className="min-h-[240px] border-border/60 bg-card/30">
+            <Empty className="min-h-60 border-border/60 bg-card/30">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   <Droplets className="w-5 h-5" />
@@ -145,12 +136,6 @@ export function OverviewPage({
               </EmptyDescription>
             </Empty>
           )}
-
-          {/* Alerts */}
-          <div className="rounded-2xl border border-border/60 bg-card p-5 flex flex-col gap-3">
-            <h2 className="text-sm font-semibold text-foreground">Alertas</h2>
-            <AlertsList alerts={alerts} />
-          </div>
         </div>
 
         {/* Right — Devices + Earth Agent */}
@@ -164,7 +149,7 @@ export function OverviewPage({
             />
           </div>
 
-          <EarthAgentPreview />
+          <EarthAgentPreview onOpen={onOpenAgent} />
         </div>
       </div>
     </div>

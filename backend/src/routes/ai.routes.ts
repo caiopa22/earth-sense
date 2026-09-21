@@ -9,7 +9,7 @@ const router = Router();
 
 const apiKey = process.env.GEMINI_API_KEY;
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
-const model = process.env.GEMINI_MODEL ?? 'gemini-3.6-flash';
+const model = process.env.GEMINI_MODEL ?? 'gemini-3.1-flash-lite';
 
 type SoilStatus = 'dry' | 'low' | 'optimal' | 'high' | 'saturated';
 
@@ -71,11 +71,14 @@ async function generateAgentResponse(instruction: string, context: ReturnType<ty
 
   const response = await ai.models.generateContent({
     model,
+    config: {
+      maxOutputTokens: 180,
+    },
     contents: [
       {
         role: 'user',
         parts: [{
-          text: `Você é o Earth Agent, especialista em manejo de irrigação. Responda em português claro, sem inventar dados. Use somente o contexto fornecido e deixe explícito quando não houver leituras suficientes. Não prescreva irrigação automática: ofereça orientação para decisão do produtor.\n\nContexto das leituras:\n${JSON.stringify(context)}\n\nSolicitação:\n${instruction}`,
+          text: `Você é o Earth Agent, especialista em manejo de irrigação. Responda em português claro e de forma muito breve: use no máximo 2 a 4 frases curtas ou 3 tópicos. Use somente o contexto fornecido, deixe explícito quando não houver leituras suficientes e não prescreva irrigação automática.\n\nContexto das leituras:\n${JSON.stringify(context)}\n\nSolicitação:\n${instruction}`,
         }],
       },
     ],

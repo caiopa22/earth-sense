@@ -6,6 +6,7 @@ import { mockDevices, mockReadings } from "../data/mock";
 import type { DashboardData, Device, SoilReading } from "../types";
 
 export const ENABLE_DEV_DATA_SOURCE_SWITCH = import.meta.env.DEV;
+const DASHBOARD_POLL_INTERVAL_MS = 3 * 60 * 1000;
 
 export type DashboardDataSource = "api" | "mock";
 
@@ -75,8 +76,12 @@ export function useDashboard(): DashboardData & {
     setSelectedDeviceId("");
   }, []);
 
-  const loadDashboard = useCallback(async () => {
-    setIsLoading(true);
+  const loadDashboard = useCallback(async (options?: { showLoading?: boolean }) => {
+    const showLoading = options?.showLoading ?? true;
+
+    if (showLoading) {
+      setIsLoading(true);
+    }
 
     try {
       const [devicesRes, readingsRes] = await Promise.all([
@@ -96,11 +101,15 @@ export function useDashboard(): DashboardData & {
           : (enrichedDevices[0]?.id ?? ""),
       );
     } catch {
-      setDevices([]);
-      setReadings([]);
-      setSelectedDeviceId("");
+      if (showLoading) {
+        setDevices([]);
+        setReadings([]);
+        setSelectedDeviceId("");
+      }
     } finally {
-      setIsLoading(false);
+      if (showLoading) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
@@ -160,6 +169,41 @@ export function useDashboard(): DashboardData & {
 
     loadDashboard();
   }, [profile?.id, isAuthenticated, isAuthLoading, dataSource, navigate, loadDashboard]);
+
+  useEffect(() => {
+    if (isAuthLoading || !isAuthenticated || !profile || dataSource === "mock") {
+      return;
+    }
+
+    const poller = window.setInterval(() => {
+      void loadDashboard({ showLoading: false });
+    }, DASHBOARD_POLL_INTERVAL_MS);
+
+    return () => window.clearInterval(poller);
+  }, [profile?.id, isAuthenticated, isAuthLoading, dataSource, loadDashboard]);
+
+  useEffect(() => {
+    if (isAuthLoading || !isAuthenticated || !profile || dataSource === "mock") {
+      return;
+    }
+
+    let nextPollAt = Date.now() + DASHBOARD_POLL_INTERVAL_MS;
+
+    const poller = window.setInterval(() => {
+      const remainingMs = nextPollAt - Date.now();
+      const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+
+      console.debug(`[dashboard poller] Próxima consulta em ${remainingSeconds}s`);
+
+      if (remainingMs <= 0) {
+        console.debug("[dashboard poller] Consultando novos registros...");
+        void loadDashboard({ showLoading: false });
+        nextPollAt = Date.now() + DASHBOARD_POLL_INTERVAL_MS;
+      }
+    }, 1000);
+
+    return () => window.clearInterval(poller);
+  }, [profile?.id, isAuthenticated, isAuthLoading, dataSource, loadDashboard]);
 
   const handleSetPage = useCallback((page: DashboardPage) => {
     setActivePage(page);

@@ -1,4 +1,6 @@
+import { Button } from "@/components/ui/button";
 import { cn } from "cn";
+import { useState } from "react";
 import {
   Area,
   AreaChart,
@@ -15,6 +17,14 @@ interface SoilChartProps {
   readings: SoilReading[];
   className?: string;
 }
+
+type ChartRangeHours = 6 | 24 | 48;
+
+const chartRanges: { label: string; hours: ChartRangeHours }[] = [
+  { label: "6h", hours: 6 },
+  { label: "24h", hours: 24 },
+  { label: "48h", hours: 48 },
+];
 
 function formatTime(iso: string) {
   const d = new Date(iso);
@@ -38,6 +48,8 @@ function CustomTooltip({ active, payload, label }: any) {
 }
 
 export function SoilChart({ readings, className }: SoilChartProps) {
+  const [rangeHours, setRangeHours] = useState<ChartRangeHours>(24);
+  const rangeStart = Date.now() - rangeHours * 60 * 60 * 1000;
   const sensorIndexes = [...new Set(readings.map((reading) => reading.sensor_index ?? 1))].sort(
     (a, b) => a - b,
   );
@@ -46,7 +58,7 @@ export function SoilChart({ readings, className }: SoilChartProps) {
   readings
     .slice()
     .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-    .slice(-Math.max(48, sensorIndexes.length * 48))
+    .filter((reading) => new Date(reading.created_at).getTime() >= rangeStart)
     .forEach((reading) => {
       const timestamp = reading.created_at;
       const point = dataByTimestamp.get(timestamp) ?? { time: formatTime(timestamp) };
@@ -59,6 +71,23 @@ export function SoilChart({ readings, className }: SoilChartProps) {
 
   return (
     <div className={cn("w-full", className)}>
+      <div className="mb-2 flex items-center justify-end gap-1">
+        {chartRanges.map((range) => (
+          <Button
+            key={range.hours}
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setRangeHours(range.hours)}
+            className={cn(
+              "h-7 rounded-md px-2 text-[11px]",
+              rangeHours === range.hours && "bg-primary/10 text-primary hover:bg-primary/15",
+            )}
+          >
+            {range.label}
+          </Button>
+        ))}
+      </div>
       <ResponsiveContainer width="100%" height={180}>
         <AreaChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
           <CartesianGrid

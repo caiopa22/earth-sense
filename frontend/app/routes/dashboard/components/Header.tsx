@@ -1,0 +1,208 @@
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "@/components/ui/toast";
+import { LogOut, Settings, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { useAuth } from "~/contexts/auth-context";
+import { authService } from "~/service/auth";
+import { ENABLE_DEV_DATA_SOURCE_SWITCH, type DashboardDataSource } from "../hooks/useDashboard";
+import type { Profile } from "../types";
+
+interface HeaderProps {
+  profile: Profile;
+  dataSource: DashboardDataSource;
+  onToggleDataSource: (source: DashboardDataSource) => void;
+}
+
+export function Header({ profile, dataSource, onToggleDataSource }: HeaderProps) {
+  const navigate = useNavigate();
+  const { clearAuth } = useAuth();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const handleLogout = async () => {
+    setLogoutOpen(false);
+
+    try {
+      await authService.logout();
+      clearAuth();
+      toast.add({
+        title: "Sessão encerrada",
+        description: "Você saiu da plataforma com segurança.",
+        type: "success",
+      });
+      navigate("/auth", { replace: true });
+    } catch {
+      clearAuth();
+      toast.add({
+        title: "Sessão encerrada",
+        description: "Você saiu da plataforma com segurança.",
+        type: "success",
+      });
+      navigate("/auth", { replace: true });
+    }
+  };
+
+  const handleDeleteProfile = async () => {
+    setDeleteOpen(false);
+    setProfileOpen(false);
+
+    try {
+      await authService.deleteProfile();
+      clearAuth();
+      toast.add({
+        title: "Perfil removido",
+        description: "Sua conta foi apagada e você foi redirecionado para a home.",
+        type: "success",
+      });
+      navigate("/", { replace: true });
+    } catch {
+      toast.add({
+        title: "Não foi possível apagar o perfil",
+        description: "Tente novamente mais tarde ou contate o suporte.",
+        type: "error",
+      });
+    }
+  };
+
+  const initials = profile.name
+    ? profile.name
+        .split(" ")
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+    : profile.email[0].toUpperCase();
+
+  return (
+    <>
+      <header className="h-14 shrink-0 border-b border-border/60 flex items-center px-4 gap-3 bg-background/80 backdrop-blur-sm">
+        <div className="flex-1" />
+
+        {ENABLE_DEV_DATA_SOURCE_SWITCH && (
+          <Button
+            variant={dataSource === "api" ? "default" : "outline"}
+            size="sm"
+            className="h-8 rounded-full text-[10px] font-medium px-3"
+            onClick={() => onToggleDataSource(dataSource === "api" ? "mock" : "api")}
+          >
+            {dataSource === "api" ? "API" : "Mocks"}
+          </Button>
+        )}
+
+        <ThemeToggle className="rounded-full w-8 h-8" />
+
+        {/* Avatar */}
+        <button
+          type="button"
+          onClick={() => setProfileOpen(true)}
+          className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-xs font-bold text-primary hover:bg-primary/30 transition-colors cursor-pointer"
+        >
+          {initials}
+        </button>
+      </header>
+
+      {/* Profile Modal */}
+      <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-base">Perfil</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex items-center gap-3 mt-1">
+            <div className="w-12 h-12 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-lg font-bold text-primary">
+              {initials}
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-semibold text-foreground">
+                {profile.name ?? "Usuário"}
+              </span>
+              <span className="text-xs text-muted-foreground">{profile.email}</span>
+            </div>
+          </div>
+
+          <Separator className="my-1" />
+
+          <div className="flex flex-col gap-1.5">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-2 text-sm rounded-xl"
+              disabled
+            >
+              <Settings className="w-4 h-4" />
+              Configurações da conta
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-2 text-sm rounded-xl text-red-500 hover:text-red-500 hover:bg-red-500/10"
+              onClick={() => {
+                setProfileOpen(false);
+                setDeleteOpen(true);
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+              Excluir perfil
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-2 text-sm rounded-xl text-red-500 hover:text-red-500 hover:bg-red-500/10"
+              onClick={() => {
+                setProfileOpen(false);
+                setLogoutOpen(true);
+              }}
+            >
+              <LogOut className="w-4 h-4" />
+              Sair da plataforma
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Account Confirm Modal */}
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-base">Excluir perfil</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Essa ação remove sua conta da plataforma e todos os dados associados. Deseja continuar?
+          </p>
+          <div className="flex gap-2 mt-2 justify-end">
+            <Button variant="ghost" className="rounded-full" onClick={() => setDeleteOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" className="rounded-full" onClick={handleDeleteProfile}>
+              <Trash2 className="w-4 h-4 mr-1.5" />
+              Excluir perfil
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Logout Confirm Modal */}
+      <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-base">Confirmar saída</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Deseja encerrar sua sessão na plataforma EarthSense?
+          </p>
+          <div className="flex gap-2 mt-2 justify-end">
+            <Button variant="ghost" className="rounded-full" onClick={() => setLogoutOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" className="rounded-full" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-1.5" />
+              Sair
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}

@@ -8,6 +8,10 @@ import { getAuthenticatedUserId } from '../utils/index.ts';
 
 const router = Router();
 
+const DEFAULT_READINGS_WINDOW_HOURS = 48;
+const MAX_READINGS_WINDOW_HOURS = 7 * 24;
+const SUPABASE_PAGE_SIZE = 1000;
+
 router.get('/', requireAuth, async (req: AuthenticatedRequest, res) => {
   const userId = getAuthenticatedUserId(req, res);
 
@@ -30,17 +34,38 @@ router.get('/', requireAuth, async (req: AuthenticatedRequest, res) => {
     return res.json({ readings: [] as SoilReading[] });
   }
 
-  const { data: readings, error: readingsError } = await supabaseAdmin
-    .from('soil_readings')
-    .select('*')
-    .in('device_id', deviceIds)
-    .order('created_at', { ascending: false });
+  // Janela padrão de 48h (maior intervalo do gráfico do dashboard)
+  const requestedHours = Number(req.query.hours);
+  const hours = Number.isFinite(requestedHours) && requestedHours > 0
+    ? Math.min(requestedHours, MAX_READINGS_WINDOW_HOURS)
+    : DEFAULT_READINGS_WINDOW_HOURS;
+  const since = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
 
-  if (readingsError) {
-    return sendError(res, 500, readingsError.message || 'Unable to fetch readings.');
+  // O Supabase limita cada resposta a 1000 linhas, então a busca é paginada
+  const readings: SoilReading[] = [];
+
+  for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
+    const { data: page, error: readingsError } = await supabaseAdmin
+      .from('soil_readings')
+      .select('*')
+      .in('device_id', deviceIds)
+      .gte('created_at', since)
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: true })
+      .range(from, from + SUPABASE_PAGE_SIZE - 1);
+
+    if (readingsError) {
+      return sendError(res, 500, readingsError.message || 'Unable to fetch readings.');
+    }
+
+    readings.push(...((page ?? []) as SoilReading[]));
+
+    if (!page || page.length < SUPABASE_PAGE_SIZE) {
+      break;
+    }
   }
 
-  return res.json({ readings: (readings ?? []) as SoilReading[] });
+  return res.json({ readings });
 });
 
 router.post('/batch', requireDeviceAuth, async (req: DeviceAuthenticatedRequest, res) => {

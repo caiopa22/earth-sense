@@ -38,6 +38,10 @@ export function OverviewPage({
 
   const selectedDevice: Device | undefined = devices.find((d) => d.id === selectedDeviceId);
   const selectedReadings = readings.filter((r) => r.device_id === selectedDeviceId);
+  const last24hStart = Date.now() - 24 * 60 * 60 * 1000;
+  const readingsLast24h = selectedReadings.filter(
+    (r) => new Date(r.created_at).getTime() >= last24hStart,
+  ).length;
   const currentHumidity = selectedDevice?.last_reading?.humidity_pct ?? 0;
 
   if (devices.length === 0) {
@@ -78,7 +82,7 @@ export function OverviewPage({
         />
         <StatCard
           title="Leituras (24h)"
-          value={selectedReadings.length}
+          value={readingsLast24h}
           icon={Activity}
           trend="Sensor selecionado"
           trendUp

@@ -1,0 +1,11 @@
+**/node_modules
+**/.env
+**/.env.*
+!**/.env.example
+.git
+.vscode
+frontend/build
+frontend/.react-router
+arduino-code
+docs
+insomnia

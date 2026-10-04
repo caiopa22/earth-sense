@@ -90,7 +90,20 @@ A aplicação estará disponível em:
 - **Frontend:** http://localhost:5173
 - **Backend:** http://localhost:3000
 
-### 4. Testando a API
+### 4. Executando com Docker (alternativa)
+Com o [Docker Desktop](https://www.docker.com/products/docker-desktop/) aberto e o arquivo `backend/.env` preenchido, na raiz do projeto execute:
+
+```bash
+docker compose up --build -d
+```
+
+O frontend fica em http://localhost:5173 e o backend em http://localhost:3000. Não é necessário ter o Node.js instalado. O banco (Supabase) e a IA (Gemini) continuam na nuvem, então é preciso conexão com a internet.
+
+Para parar: `docker compose down`. Para ver os logs: `docker compose logs -f`.
+
+> O ESP32 deve enviar as leituras para `http://<IP-do-computador-na-rede>:3000`. Se não conectar, libere a porta 3000 no Firewall do Windows.
+
+### 5. Testando a API
 Você pode importar o arquivo `insomnia/earthsense-api.insomnia.json` no cliente **Insomnia** para testar as rotas de ingestão de dados e interações com a IA.
 
 ---

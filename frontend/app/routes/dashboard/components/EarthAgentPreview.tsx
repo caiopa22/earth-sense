@@ -10,7 +10,7 @@ const capabilities = [
   {
     icon: Leaf,
     label: "Classificação do solo",
-    description: "Classifica o estado do solo em 5 categorias com 95% de acurácia.",
+    description: "Classifica o estado do solo em 5 faixas de umidade.",
   },
   {
     icon: MessageSquare,

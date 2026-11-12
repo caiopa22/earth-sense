@@ -17,6 +17,8 @@ export interface Device {
   is_online?: boolean;
   last_seen?: string;
   last_reading?: SoilReading | null;
+  // Média da última leitura de cada sensor do dispositivo
+  current_humidity_pct?: number | null;
 }
 
 export interface SoilReading {

@@ -29,8 +29,8 @@ export function OverviewPage({
   const onlineDevices = devices.filter((d) => d.is_online).length;
 
   const allLatestHumidity = devices
-    .filter((d) => d.last_reading)
-    .map((d) => d.last_reading!.humidity_pct);
+    .map((d) => d.current_humidity_pct)
+    .filter((h): h is number => h != null);
   const avgHumidity =
     allLatestHumidity.length > 0
       ? allLatestHumidity.reduce((a, b) => a + b, 0) / allLatestHumidity.length
@@ -42,7 +42,7 @@ export function OverviewPage({
   const readingsLast24h = selectedReadings.filter(
     (r) => new Date(r.created_at).getTime() >= last24hStart,
   ).length;
-  const currentHumidity = selectedDevice?.last_reading?.humidity_pct ?? 0;
+  const currentHumidity = selectedDevice?.current_humidity_pct ?? 0;
 
   if (devices.length === 0) {
     return (

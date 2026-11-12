@@ -17,7 +17,7 @@ function timeAgo(iso: string): string {
 }
 
 export function DeviceCard({ device, isSelected, onClick }: DeviceCardProps) {
-  const humidity = device.last_reading?.humidity_pct ?? null;
+  const humidity = device.current_humidity_pct ?? null;
   const status = humidity !== null ? getSoilStatus(humidity) : null;
 
   return (

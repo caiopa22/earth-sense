@@ -10,16 +10,33 @@ const DASHBOARD_POLL_INTERVAL_MS = 3 * 60 * 1000;
 
 export type DashboardDataSource = "api" | "mock";
 
+const readingTime = (reading: SoilReading) => new Date(reading.sampled_at ?? reading.created_at).getTime();
+
 function enrichDevices(devices: Device[], readings: SoilReading[]): Device[] {
   return devices.map((device) => {
-    const latest = readings
+    const deviceReadings = readings
       .filter((reading) => reading.device_id === device.id)
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+      .sort((a, b) => readingTime(b) - readingTime(a));
+    const latest = deviceReadings[0];
+
+    // Todos os sensores de um lote chegam juntos; usar só a leitura mais recente
+    // mostraria um sensor arbitrário. A umidade do dispositivo é a média da
+    // última leitura de cada sensor.
+    const latestBySensor = new Map<number, number>();
+    for (const reading of deviceReadings) {
+      if (!latestBySensor.has(reading.sensor_index)) {
+        latestBySensor.set(reading.sensor_index, reading.humidity_pct);
+      }
+    }
+    const sensorValues = [...latestBySensor.values()];
+    const currentHumidity =
+      sensorValues.length > 0 ? sensorValues.reduce((sum, value) => sum + value, 0) / sensorValues.length : null;
 
     return {
       ...device,
       sensor_count: device.sensor_count ?? 1,
       last_reading: latest ?? null,
+      current_humidity_pct: currentHumidity,
       is_online: device.last_seen
         ? Date.now() - new Date(device.last_seen).getTime() < 15 * 60 * 1000
         : Boolean(latest),

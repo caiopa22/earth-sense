@@ -6,7 +6,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Activity, Cpu, Droplets } from "lucide-react";
-import { DeviceList } from "../components/DeviceList";
+import { DeviceSelect } from "../components/DeviceSelect";
 import { ForecastCard } from "../components/ForecastCard";
 import { HumidityGauge } from "../components/HumidityGauge";
 import { SoilChart } from "../components/SoilChart";
@@ -89,73 +89,56 @@ export function OverviewPage({
         />
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Left — Gauge + Chart */}
-        <div className="lg:col-span-2 flex flex-col gap-4">
-          {/* Gauge + Chart card */}
-          {selectedDevice ? (
-            <div className="rounded-2xl border border-border/60 bg-card p-5 flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-0.5">
-                  <h2 className="text-sm font-semibold text-foreground">Umidade Atual</h2>
-                  <p className="text-xs text-muted-foreground">
-                    {selectedDevice.name} · {selectedDevice.location ?? ""}
-                  </p>
-                </div>
-              </div>
+      {/* Current humidity + chart — full width, device picked in the header */}
+      <div className="rounded-2xl border border-border/60 bg-card p-5 flex flex-col gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold text-foreground">Umidade Atual</h2>
+          <DeviceSelect
+            devices={devices}
+            selectedDeviceId={selectedDeviceId}
+            onSelect={setSelectedDeviceId}
+          />
+        </div>
 
-              <div className="flex flex-col sm:flex-row items-center gap-6">
-                <HumidityGauge humidity={currentHumidity} className="shrink-0" />
-                <div className="flex-1 w-full">
-                  <p className="text-xs text-muted-foreground mb-2">Histórico — últimas 24h</p>
-                  {selectedReadings.length === 0 ? (
-                    <Empty className="min-h-45 border-border/60 bg-transparent">
-                      <EmptyHeader>
-                        <EmptyMedia variant="icon">
-                          <Droplets className="w-5 h-5" />
-                        </EmptyMedia>
-                        <EmptyTitle>Sem leitura recente</EmptyTitle>
-                      </EmptyHeader>
-                      <EmptyDescription>
-                        O sensor ainda não enviou dados de umidade nas últimas 24 horas.
-                      </EmptyDescription>
-                    </Empty>
-                  ) : (
-                    <SoilChart readings={selectedReadings} />
-                  )}
-                </div>
-              </div>
+        {selectedDevice ? (
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            <HumidityGauge humidity={currentHumidity} className="shrink-0" />
+            <div className="flex-1 w-full">
+              <p className="text-xs text-muted-foreground mb-2">Histórico — últimas 24h</p>
+              {selectedReadings.length === 0 ? (
+                <Empty className="min-h-45 border-border/60 bg-transparent">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <Droplets className="w-5 h-5" />
+                    </EmptyMedia>
+                    <EmptyTitle>Sem leitura recente</EmptyTitle>
+                  </EmptyHeader>
+                  <EmptyDescription>
+                    O sensor ainda não enviou dados de umidade nas últimas 24 horas.
+                  </EmptyDescription>
+                </Empty>
+              ) : (
+                <SoilChart readings={selectedReadings} height={260} />
+              )}
             </div>
-          ) : (
-            <Empty className="min-h-60 border-border/60 bg-card/30">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Droplets className="w-5 h-5" />
-                </EmptyMedia>
-                <EmptyTitle>Selecione um sensor</EmptyTitle>
-              </EmptyHeader>
-              <EmptyDescription>
-                Escolha um dispositivo na lista lateral para visualizar a umidade atual.
-              </EmptyDescription>
-            </Empty>
-          )}
-        </div>
-
-        {/* Right — Devices + Forecast */}
-        <div className="flex flex-col gap-4">
-          <div className="rounded-2xl border border-border/60 bg-card p-5 flex flex-col gap-3">
-            <h2 className="text-sm font-semibold text-foreground">Sensores</h2>
-            <DeviceList
-              devices={devices}
-              selectedDeviceId={selectedDeviceId}
-              onSelect={setSelectedDeviceId}
-            />
           </div>
-
-          {selectedDevice ? <ForecastCard deviceId={selectedDevice.id} isMock={isMock} /> : null}
-        </div>
+        ) : (
+          <Empty className="min-h-60 border-border/60 bg-transparent">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Droplets className="w-5 h-5" />
+              </EmptyMedia>
+              <EmptyTitle>Selecione um dispositivo</EmptyTitle>
+            </EmptyHeader>
+            <EmptyDescription>
+              Escolha um dispositivo no seletor acima para visualizar a umidade atual.
+            </EmptyDescription>
+          </Empty>
+        )}
       </div>
+
+      {/* Forecast — one card per sensor, side by side */}
+      {selectedDevice ? <ForecastCard deviceId={selectedDevice.id} isMock={isMock} /> : null}
     </div>
   );
 }

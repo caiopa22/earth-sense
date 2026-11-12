@@ -20,7 +20,7 @@ export function ForecastCard({ deviceId, isMock }: ForecastCardProps) {
   return (
     <div className="rounded-2xl border border-border/60 bg-card p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-foreground">Previsão a 30 min</h2>
+        <h2 className="text-sm font-semibold text-foreground">Previsão a 30 min por sensor</h2>
         <span className="p-2 rounded-xl bg-primary/10">
           <TrendingUp className="w-4 h-4 text-primary" />
         </span>
@@ -38,7 +38,7 @@ export function ForecastCard({ deviceId, isMock }: ForecastCardProps) {
         <p className="text-xs text-muted-foreground">{error ?? "Selecione um sensor."}</p>
       ) : (
         <>
-          <ul className="flex flex-col gap-2">
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {forecast.sensors.map((sensor) => (
               <li
                 key={sensor.sensor_index}
@@ -78,8 +78,7 @@ export function ForecastCard({ deviceId, isMock }: ForecastCardProps) {
                     </div>
                     {sensor.model_metrics ? (
                       <p className="text-[11px] text-muted-foreground">
-                        erro médio (MAE) de {formatPoints(sensor.model_metrics.mae)} pontos
-                        percentuais
+                        erro médio ±{formatPoints(sensor.model_metrics.mae)} p.p.
                       </p>
                     ) : null}
                   </>

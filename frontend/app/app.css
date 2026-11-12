@@ -241,3 +241,28 @@ body {
     stroke-dashoffset: 0;
   }
 }
+
+@keyframes es-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+.landing .es-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: es-pulse 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing .es-pulse {
+    animation: none;
+    opacity: 0.2;
+  }
+}

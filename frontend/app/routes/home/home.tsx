@@ -44,7 +44,8 @@ const CHART = { w: 560, h: 220, top: 12, bottom: 8 };
 function seriesFor(s: (typeof SENSORS)[number], idx: number) {
   const values: number[] = [];
   let v = s.base;
-  for (let t = 0; t < POINTS; t++) {
+  // POINTS + 1: o último ponto é o valor 30 min à frente, exibido como previsão
+  for (let t = 0; t <= POINTS; t++) {
     const hour = (18 + t / 2) % 24;
     const sun = hour >= 9 && hour < 16;
     const shadeBack = s.shade && hour >= 13 && hour < 18;
@@ -67,8 +68,9 @@ function toPath(values: number[]) {
 }
 
 const SERIES = SENSORS.map((s, i) => {
-  const values = seriesFor(s, i);
-  return { ...s, path: toPath(values), last: values[values.length - 1] };
+  const all = seriesFor(s, i);
+  const values = all.slice(0, POINTS);
+  return { ...s, path: toPath(values), last: values[POINTS - 1], next: all[POINTS] };
 });
 
 /* ------------------------------------------------------------------ */
@@ -103,11 +105,53 @@ const PIPELINE = [
   },
   {
     n: "04",
+    title: "Previsão",
+    where: "GET /api/ml/forecast",
+    body: "As quatro leituras mais recentes de cada sensor passam por uma regressão Ridge, treinada em Python e exportada como coeficientes. A conta roda no próprio backend, sem Python em produção.",
+  },
+  {
+    n: "05",
     title: "Leitura",
-    where: "React 19 · scikit-learn",
-    body: "O dashboard desenha uma série por sensor e mostra a previsão de umidade para os próximos 30 minutos, calculada por um modelo treinado com as leituras do próprio projeto.",
+    where: "React 19 · Recharts",
+    body: "O dashboard mostra a umidade atual, o histórico de cada sensor e, lado a lado, a umidade prevista para daqui a 30 minutos com o erro médio do modelo.",
   },
 ];
+
+/* ------------------------------------------------------------------ */
+/* Previsão — erro médio (MAE) de ml/output/metrics.json, em pontos    */
+/* percentuais, no conjunto de teste                                    */
+/* ------------------------------------------------------------------ */
+
+const FORECAST_MAE = [
+  { id: "S1", ridge: 1.6, persistence: 2.09 },
+  { id: "S2", ridge: 0.87, persistence: 0.82 },
+  { id: "S3", ridge: 6.58, persistence: 5.29 },
+  { id: "S4", ridge: 6.99, persistence: 6.57 },
+  { id: "S5", ridge: 10.99, persistence: 9.1 },
+];
+const MAE_MAX = 12;
+
+/* Exemplo ilustrativo do sensor S1: 4 leituras de entrada e a previsão */
+/* para t + 30 min, com a faixa de ± MAE do Ridge nesse sensor.         */
+const FC = { w: 520, h: 250, left: 34, right: 16, top: 20, bottom: 30 };
+const FC_X = { min: -20, max: 35 };
+const FC_Y = { min: 62, max: 76 };
+const FC_INPUT = [
+  { m: -15, v: 71.2 },
+  { m: -10, v: 70.8 },
+  { m: -5, v: 70.3 },
+  { m: 0, v: 69.9 },
+];
+const FC_NOW = FC_INPUT[FC_INPUT.length - 1];
+const FC_PRED = { m: 30, v: 68.4, mae: 1.6 };
+
+const fcX = (m: number) =>
+  FC.left + ((m - FC_X.min) / (FC_X.max - FC_X.min)) * (FC.w - FC.left - FC.right);
+const fcY = (v: number) =>
+  FC.top + (1 - (v - FC_Y.min) / (FC_Y.max - FC_Y.min)) * (FC.h - FC.top - FC.bottom);
+
+const formatPt = (n: number, digits = 1) =>
+  n.toLocaleString("pt-BR", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 
 const STACK = [
   "ESP32",
@@ -117,6 +161,7 @@ const STACK = [
   "Supabase",
   "PostgreSQL",
   "React 19",
+  "Python",
   "scikit-learn",
 ];
 
@@ -185,7 +230,7 @@ export default function Home() {
               style={{ animationDelay: "240ms" }}
             >
               O EarthSense conecta sensores capacitivos a um ESP32, guarda cada leitura na nuvem e
-              transforma a série histórica em gráficos e respostas em linguagem natural.
+              usa a série histórica para prever a umidade de cada sensor nos próximos 30 minutos.
             </p>
             <div
               className="es-rise mt-10 flex flex-wrap items-center gap-3"
@@ -314,13 +359,17 @@ export default function Home() {
                     {Math.round(s.last)}
                     <span className="text-xs text-white/40">%</span>
                   </span>
+                  <span className="font-data mt-0.5 block text-[10px] text-white/40 tabular-nums">
+                    → {Math.round(s.next)}%<span className="hidden sm:inline"> em 30 min</span>
+                  </span>
                 </li>
               ))}
             </ul>
 
             <figcaption className="mt-5 text-[11px] leading-relaxed text-white/40">
               Série ilustrativa no padrão observado no TCC: variação lenta à noite, queda sob sol,
-              estabilização dos sensores S1 e S4 na sombra.
+              estabilização dos sensores S1 e S4 na sombra. Abaixo de cada valor, a previsão para
+              daqui a 30 minutos.
             </figcaption>
           </figure>
         </section>
@@ -346,12 +395,12 @@ export default function Home() {
               <em className="text-primary">à resposta.</em>
             </h2>
             <p className="max-w-xl text-(--ink-soft) lg:justify-self-end">
-              Quatro etapas, cada uma com uma responsabilidade clara. O caminho de uma leitura,
-              desde o momento em que é medida no campo até aparecer no dashboard.
+              Cinco etapas, cada uma com uma responsabilidade clara. O caminho de uma leitura, desde
+              o momento em que é medida no campo até virar previsão no dashboard.
             </p>
           </div>
 
-          <ol className="mt-16 grid gap-x-10 md:grid-cols-2 lg:grid-cols-4">
+          <ol className="mt-16 grid gap-x-8 md:grid-cols-2 lg:grid-cols-5">
             {PIPELINE.map((step) => (
               <li key={step.n} className="group relative border-t border-(--line) pt-8 pb-12">
                 <span className="absolute -top-px left-0 h-px w-0 bg-primary transition-all duration-500 group-hover:w-full" />
@@ -400,8 +449,11 @@ export default function Home() {
         </section>
 
         {/* PREVISÃO */}
-        <section id="previsao" className="mx-auto max-w-7xl scroll-mt-20 px-5 py-24 sm:px-8 lg:py-32">
-          <div className="grid gap-14 lg:grid-cols-2 lg:items-center lg:gap-20">
+        <section
+          id="previsao"
+          className="mx-auto max-w-7xl scroll-mt-20 px-5 py-24 sm:px-8 lg:py-32"
+        >
+          <div className="grid gap-14 lg:grid-cols-[1fr_1.15fr] lg:items-center lg:gap-20">
             <div>
               <p className="font-data text-[11px] tracking-[0.2em] text-(--ink-soft) uppercase">
                 Previsão · Regressão Ridge
@@ -413,31 +465,320 @@ export default function Home() {
               </h2>
               <p className="mt-8 max-w-md leading-relaxed text-(--ink-soft)">
                 Um modelo treinado com as leituras do próprio protótipo estima a umidade de cada
-                sensor meia hora à frente. O erro é medido em dados separados por ordem cronológica
-                e comparado com a estratégia mais simples: repetir o último valor lido.
+                sensor meia hora à frente. A conta é feita na hora, a cada consulta, a partir das
+                leituras mais recentes.
               </p>
+
+              <ol className="mt-10">
+                {[
+                  [
+                    "Entrada",
+                    "As 4 leituras mais recentes do sensor, suas diferenças, média e desvio.",
+                  ],
+                  [
+                    "Modelo",
+                    "Regressão Ridge treinada em Python e exportada como coeficientes em JSON.",
+                  ],
+                  [
+                    "Saída",
+                    "Umidade prevista para t + 30 min, a faixa correspondente e o erro médio do modelo.",
+                  ],
+                ].map(([label, text], i) => (
+                  <li
+                    key={label}
+                    className="flex gap-4 border-t border-(--line) py-4 text-sm leading-relaxed text-(--ink-soft)"
+                  >
+                    <span className="font-data pt-0.5 text-[10px] text-primary">0{i + 1}</span>
+                    <div>
+                      <p className="font-data mb-1 text-[10px] tracking-[0.2em] text-(--ink) uppercase">
+                        {label}
+                      </p>
+                      {text}
+                    </div>
+                  </li>
+                ))}
+              </ol>
             </div>
 
-            <ol className="space-y-3">
-              {[
-                ["Entrada", "As 4 leituras mais recentes do sensor, suas diferenças, média e desvio."],
-                ["Modelo", "Regressão Ridge treinada em Python e exportada como coeficientes em JSON."],
-                ["Saída", "Umidade prevista para t + 30 min e a faixa correspondente, ao lado do erro médio (MAE) do modelo."],
-              ].map(([label, text], i) => (
-                <li
-                  key={label}
-                  className="flex gap-4 rounded-3xl border border-(--line) bg-(--paper-2) px-5 py-4 text-sm leading-relaxed"
+            {/* Instrumento de previsão */}
+            <figure className="relative overflow-hidden rounded-[1.75rem] bg-(--panel) p-5 text-(--panel-ink) shadow-[0_30px_80px_-30px_oklch(0_0_0/0.5)] sm:p-7">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-data text-[10px] tracking-[0.2em] text-white/50 uppercase">
+                    Sensor S1 · exemplo
+                  </p>
+                  <p className="font-display mt-1 text-4xl tabular-nums">
+                    {formatPt(FC_PRED.v)}
+                    <span className="font-data ml-1 text-sm text-white/50">%</span>
+                    <span className="font-data ml-3 text-xs text-white/40">
+                      ± {formatPt(FC_PRED.mae)} p.p.
+                    </span>
+                  </p>
+                </div>
+                <span className="font-data shrink-0 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[10px] tracking-wider text-primary uppercase">
+                  t + 30 min
+                </span>
+              </div>
+
+              <svg
+                viewBox={`0 0 ${FC.w} ${FC.h}`}
+                className="mt-6 w-full overflow-visible"
+                role="img"
+                aria-label="Exemplo de previsão: quatro leituras recentes do sensor S1 e a umidade prevista para daqui a 30 minutos, com a faixa de erro médio"
+              >
+                {/* zona de previsão */}
+                <rect
+                  x={fcX(0)}
+                  y={FC.top}
+                  width={fcX(FC_X.max) - fcX(0)}
+                  height={FC.h - FC.top - FC.bottom}
+                  fill="var(--primary)"
+                  fillOpacity="0.05"
+                />
+                {[64, 68, 72, 76].map((g) => (
+                  <g key={g}>
+                    <line
+                      x1={FC.left}
+                      x2={FC.w - FC.right}
+                      y1={fcY(g)}
+                      y2={fcY(g)}
+                      stroke="white"
+                      strokeOpacity="0.07"
+                    />
+                    <text
+                      x={FC.left - 8}
+                      y={fcY(g) + 3}
+                      textAnchor="end"
+                      className="font-data"
+                      fontSize="9"
+                      fill="white"
+                      fillOpacity="0.35"
+                    >
+                      {g}
+                    </text>
+                  </g>
+                ))}
+
+                {/* limite entre as faixas alta e ótima */}
+                <line
+                  x1={FC.left}
+                  x2={FC.w - FC.right}
+                  y1={fcY(70)}
+                  y2={fcY(70)}
+                  stroke="#3b82f6"
+                  strokeOpacity="0.55"
+                  strokeDasharray="2 4"
+                />
+                <text
+                  x={fcX(-20) + 4}
+                  y={fcY(70) - 6}
+                  className="font-data"
+                  fontSize="9"
+                  fill="#3b82f6"
+                  fillOpacity="0.85"
                 >
-                  <span className="font-data pt-0.5 text-[10px] text-primary">0{i + 1}</span>
-                  <div>
-                    <p className="font-data mb-1 text-[10px] tracking-[0.2em] text-primary uppercase">
-                      {label}
-                    </p>
-                    {text}
+                  70% · ALTA ↑ ÓTIMA ↓
+                </text>
+
+                {/* faixa de erro (± MAE) */}
+                <path
+                  d={`M${fcX(FC_NOW.m)},${fcY(FC_NOW.v)} L${fcX(FC_PRED.m)},${fcY(FC_PRED.v + FC_PRED.mae)} L${fcX(FC_PRED.m)},${fcY(FC_PRED.v - FC_PRED.mae)} Z`}
+                  fill="var(--primary)"
+                  fillOpacity="0.16"
+                />
+
+                {/* leituras de entrada */}
+                <path
+                  d={FC_INPUT.map((p, i) => `${i === 0 ? "M" : "L"}${fcX(p.m)},${fcY(p.v)}`).join(
+                    " ",
+                  )}
+                  fill="none"
+                  stroke="white"
+                  strokeOpacity="0.85"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                {/* projeção */}
+                <line
+                  x1={fcX(FC_NOW.m)}
+                  y1={fcY(FC_NOW.v)}
+                  x2={fcX(FC_PRED.m)}
+                  y2={fcY(FC_PRED.v)}
+                  stroke="var(--primary)"
+                  strokeWidth="2"
+                  strokeDasharray="5 5"
+                  strokeLinecap="round"
+                />
+                {FC_INPUT.map((p) => (
+                  <circle
+                    key={p.m}
+                    cx={fcX(p.m)}
+                    cy={fcY(p.v)}
+                    r="3.5"
+                    fill="var(--panel)"
+                    stroke="white"
+                    strokeWidth="1.5"
+                  />
+                ))}
+                <line
+                  x1={fcX(FC_PRED.m)}
+                  x2={fcX(FC_PRED.m)}
+                  y1={fcY(FC_PRED.v + FC_PRED.mae)}
+                  y2={fcY(FC_PRED.v - FC_PRED.mae)}
+                  stroke="var(--primary)"
+                  strokeOpacity="0.6"
+                />
+                <circle
+                  cx={fcX(FC_PRED.m)}
+                  cy={fcY(FC_PRED.v)}
+                  r="9"
+                  fill="var(--primary)"
+                  className="es-pulse"
+                />
+                <circle cx={fcX(FC_PRED.m)} cy={fcY(FC_PRED.v)} r="4.5" fill="var(--primary)" />
+
+                {/* agora */}
+                <line
+                  x1={fcX(0)}
+                  x2={fcX(0)}
+                  y1={FC.top}
+                  y2={FC.h - FC.bottom}
+                  stroke="white"
+                  strokeOpacity="0.25"
+                />
+                <text
+                  x={fcX(0) + 6}
+                  y={FC.top + 10}
+                  className="font-data"
+                  fontSize="9"
+                  fill="white"
+                  fillOpacity="0.55"
+                >
+                  AGORA
+                </text>
+                <text
+                  x={fcX(FC_PRED.m) + 4}
+                  y={FC.top + 10}
+                  textAnchor="end"
+                  className="font-data"
+                  fontSize="9"
+                  fill="var(--primary)"
+                >
+                  PREVISÃO
+                </text>
+
+                {/* eixo de tempo (min) */}
+                {[-15, -10, -5, 0, 30].map((m) => (
+                  <text
+                    key={m}
+                    x={fcX(m)}
+                    y={FC.h - 10}
+                    textAnchor="middle"
+                    className="font-data"
+                    fontSize="9"
+                    fill={m === 30 ? "var(--primary)" : "white"}
+                    fillOpacity={m === 30 ? 1 : 0.35}
+                  >
+                    {m === 0 ? "t" : m > 0 ? `+${m} min` : m}
+                  </text>
+                ))}
+              </svg>
+
+              <div className="font-data mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-(--panel-line) pt-4 text-[10px] text-white/50">
+                <span className="flex items-center gap-1.5">
+                  <span className="size-1.5 rounded-full bg-white" />4 leituras de entrada, de 5 em
+                  5 min
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 border-t border-dashed border-primary" />
+                  projeção
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-3 rounded-sm bg-primary/30" />± erro médio do sensor
+                </span>
+              </div>
+            </figure>
+          </div>
+
+          {/* Avaliação */}
+          <div className="mt-24 grid gap-12 border-t border-(--line) pt-14 lg:grid-cols-[1fr_1.15fr] lg:gap-20">
+            <div>
+              <h3 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[0.95]">
+                Medido contra
+                <br />
+                <em className="text-primary">o óbvio.</em>
+              </h3>
+              <p className="mt-6 max-w-md text-sm leading-relaxed text-(--ink-soft)">
+                O erro é calculado em dados separados por ordem cronológica, que o modelo nunca viu,
+                e comparado com a estratégia mais simples: repetir o último valor lido. Com cerca de
+                21 horas de coleta, o Ridge supera essa referência no sensor S1 e fica próximo dela
+                nos demais. Mais dias de dados, incluindo irrigações, são o próximo passo.
+              </p>
+              <dl className="mt-8 grid max-w-sm grid-cols-2 gap-px overflow-hidden rounded-2xl border border-(--line) bg-(--line)">
+                {[
+                  { label: "Ridge", value: 5.41 },
+                  { label: "Persistência", value: 4.77 },
+                ].map((m) => (
+                  <div key={m.label} className="bg-(--paper) p-5">
+                    <dt className="font-data text-[10px] tracking-[0.2em] text-(--ink-soft) uppercase">
+                      {m.label}
+                    </dt>
+                    <dd className="font-display mt-2 text-4xl tabular-nums">
+                      {formatPt(m.value, 2)}
+                      <span className="font-data ml-1.5 text-[10px] text-(--ink-soft)">
+                        MAE geral
+                      </span>
+                    </dd>
                   </div>
-                </li>
-              ))}
-            </ol>
+                ))}
+              </dl>
+            </div>
+
+            <figure>
+              <figcaption className="font-data flex flex-wrap items-center justify-between gap-3 text-[10px] tracking-[0.2em] text-(--ink-soft) uppercase">
+                <span>Erro médio por sensor · p.p.</span>
+                <span className="flex items-center gap-4 tracking-normal normal-case">
+                  <span className="flex items-center gap-1.5">
+                    <span className="size-2 rounded-full bg-primary" />
+                    Ridge
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="size-2 rounded-full bg-(--ink-soft)/40" />
+                    Persistência
+                  </span>
+                </span>
+              </figcaption>
+              <ul className="mt-6 space-y-5">
+                {FORECAST_MAE.map((row) => (
+                  <li key={row.id} className="grid grid-cols-[2.5rem_1fr] items-center gap-x-4">
+                    <span className="font-data text-xs text-(--ink-soft)">{row.id}</span>
+                    <div className="space-y-1.5">
+                      {[
+                        { value: row.ridge, className: "bg-primary" },
+                        { value: row.persistence, className: "bg-(--ink-soft)/35" },
+                      ].map((bar, i) => (
+                        <div key={i} className="flex items-center gap-3">
+                          <div className="h-2 flex-1 overflow-hidden rounded-full bg-(--paper-2)">
+                            <div
+                              className={`h-full rounded-full ${bar.className}`}
+                              style={{ width: `${(bar.value / MAE_MAX) * 100}%` }}
+                            />
+                          </div>
+                          <span className="font-data w-10 text-right text-[11px] text-(--ink-soft) tabular-nums">
+                            {formatPt(bar.value, 2)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    {row.ridge < row.persistence ? (
+                      <span className="font-data col-start-2 mt-1.5 text-[10px] text-primary">
+                        Ridge abaixo da persistência
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </figure>
           </div>
         </section>
 

@@ -18,7 +18,6 @@ A plataforma **EarthSense** é um sistema integrado focado no monitoramento em t
 - 🧠 **Previsão a 30 min (ML):** Modelo de regressão Ridge, treinado em Python (scikit-learn) com as leituras do projeto, prevê a umidade de cada sensor 30 minutos à frente. A inferência roda em TypeScript no backend, sem Python em produção.
 - 📊 **Dashboard em Tempo Real:** Interface web responsiva em React para visualização de leituras, gráficos históricos e dados dos dispositivos.
 - 🗄️ **Armazenamento Seguro:** Banco de dados relacional (PostgreSQL via Supabase) com autenticação e políticas de segurança por nível de linha (RLS).
-- 🚀 **Automação (CI/CD):** Deploy contínuo da aplicação e fácil replicação do ambiente de desenvolvimento.
 
 ---
 
@@ -28,8 +27,10 @@ O repositório está organizado em monorepo, separando responsabilidades lógica
 
 ```text
 earth-sense/
-├── arduino-code/       # 💻 Firmware C/C++ para o ESP32
+├── arduino-code/       # 💻 Firmware C/C++ para o ESP32 (arduino-code.ino + arduino_secrets.h)
 ├── backend/            # ⚙️ API RESTful (Node.js + Express + TypeScript)
+│   ├── supabase/
+│   │   └── migrations/ # Schema do banco (tabelas, RLS e permissões)
 │   ├── src/
 │   │   ├── routes/     # Endpoints (auth, dispositivos, leituras, previsão)
 │   │   ├── ml/         # Inferência do modelo (forecast.ts) e model.json exportado
@@ -57,7 +58,7 @@ earth-sense/
 ## 🛠️ Tecnologias Utilizadas
 
 ### Hardware (Camada IoT)
-- **Microcontrolador:** ESP32 (Wi-Fi Nativo, Dual-Core, Deep Sleep)
+- **Microcontrolador:** ESP32 (Wi-Fi Nativo, Dual-Core)
 - **Sensores:** Capacitivos de Umidade do Solo v1.2
 
 ### Software e Web
@@ -71,14 +72,44 @@ earth-sense/
 ## 🚀 Como Executar Localmente
 
 ### 1. Pré-requisitos
-- [Node.js](https://nodejs.org/) v18+ instalado.
-- Conta e Projeto configurado no [Supabase](https://supabase.com/).
+- [Node.js](https://nodejs.org/) **v22.22 ou superior** (exigido pelo React Router 8, Vite e Vitest).
+- Conta e projeto criados no [Supabase](https://supabase.com/).
+- [Arduino IDE](https://www.arduino.cc/en/software) com o pacote de placas **esp32** (Espressif) e a biblioteca **ArduinoJson** (apenas para gravar o firmware).
 - Python 3.10+ (apenas para treinar o modelo).
 
-### 2. Configuração de Variáveis de Ambiente
-Tanto a pasta `backend/` quanto `frontend/` possuem arquivos `.env.example`. Crie cópias nomeadas `.env` em ambas as pastas e preencha com suas credenciais de desenvolvimento.
+### 2. Variáveis de Ambiente
+Copie os arquivos de exemplo e preencha com os dados do seu projeto Supabase:
 
-### 3. Instalação e Execução
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
+
+**`backend/.env`**
+
+| Variável | Onde encontrar |
+|---|---|
+| `SUPABASE_URL` | Supabase → Project Settings → API → Project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API → chave `service_role` (nunca exponha no frontend) |
+| `PORT` | Porta da API (padrão `3000`) |
+
+**`frontend/.env`**
+
+| Variável | Valor |
+|---|---|
+| `VITE_API_URL` | URL da API, por padrão `http://localhost:3000/api` |
+
+### 3. Banco de Dados (migrations)
+O schema completo (tabelas `profiles`, `devices` e `soil_readings`, políticas RLS e permissões) está em `backend/supabase/migrations/`. Para aplicá-lo no seu projeto Supabase, pegue a connection string em **Supabase → Connect → Session pooler** (substitua `[YOUR-PASSWORD]` pela senha do banco) e rode, a partir da raiz:
+
+```bash
+cd backend
+npx supabase db push --db-url "postgresql://postgres.<project-ref>:<senha>@aws-0-<regiao>.pooler.supabase.com:5432/postgres"
+```
+
+O comando aplica, em ordem, apenas as migrations que ainda não rodaram naquele banco, então pode ser executado de novo sempre que surgir uma migration nova.
+
+### 4. Instalação e Execução
 Na raiz do projeto (onde este README está localizado), execute:
 
 ```bash
@@ -93,7 +124,7 @@ A aplicação estará disponível em:
 - **Frontend:** http://localhost:5173
 - **Backend:** http://localhost:3000
 
-### 4. Executando com Docker (alternativa)
+### 5. Executando com Docker (alternativa)
 Com o [Docker Desktop](https://www.docker.com/products/docker-desktop/) aberto e o arquivo `backend/.env` preenchido, na raiz do projeto execute:
 
 ```bash
@@ -104,12 +135,34 @@ O frontend fica em http://localhost:5173 e o backend em http://localhost:3000. N
 
 Para parar: `docker compose down`. Para ver os logs: `docker compose logs -f`.
 
-> O ESP32 deve enviar as leituras para `http://<IP-do-computador-na-rede>:3000`. Se não conectar, libere a porta 3000 no Firewall do Windows.
+### 6. Configurando o ESP32
+O firmware fica em `arduino-code/` e lê 5 sensores capacitivos (GPIOs 39, 34, 35, 32 e 33), enviando um lote com todas as leituras a cada 5 minutos para a API.
 
-### 5. Testando a API
-Você pode importar o arquivo `insomnia/earthsense-api.insomnia.json` no cliente **Insomnia** para testar as rotas de ingestão de dados e a rota de previsão (`ML - Forecast 30 min`).
+1. **Cadastre o dispositivo** no dashboard (página Dispositivos) com o mesmo número de sensores ligados ao ESP32 (5 no firmware atual). Anote o `id` do dispositivo.
+2. **Gere a chave do dispositivo** com o request `Devices - Provision Device Key` do Insomnia (`POST /api/devices/:id/device-key`, autenticado com o token do usuário). A resposta traz o campo `device_key`, que **só é mostrado uma vez**; gerar uma nova chave invalida a anterior.
+3. **Crie o arquivo de credenciais** a partir do exemplo:
+   ```bash
+   cp arduino-code/arduino_secrets.example.h arduino-code/arduino_secrets.h
+   ```
+   e preencha:
 
-### 6. Testes automatizados
+   | Constante | Valor |
+   |---|---|
+   | `WIFI_SSID` / `WIFI_PASSWORD` | Rede Wi-Fi **2,4 GHz** (o ESP32 não conecta em 5 GHz) |
+   | `API_ENDPOINT` | `http://<IP-do-computador-na-rede>:3000/api/soil-readings/batch` |
+   | `DEVICE_ID` | `id` do dispositivo cadastrado no passo 1 |
+   | `DEVICE_KEY` | `device_key` gerada no passo 2 |
+
+   O `arduino_secrets.h` está no `.gitignore` e não deve ser commitado.
+4. **Grave o firmware**: abra `arduino-code/arduino-code.ino` na Arduino IDE, selecione a placa **ESP32 Dev Module** e a porta, e faça o upload.
+5. **Confira no Serial Monitor** (115200 baud): o ESP32 mostra o IP obtido, o endpoint configurado e a resposta da API a cada envio (`201` indica lote gravado).
+
+> Se o ESP32 não conseguir enviar, verifique se o computador e o ESP32 estão na mesma rede e libere a porta 3000 no Firewall do Windows. Uma resposta `401` indica chave inválida ou revogada; `400` indica que o número de sensores enviados é diferente do cadastrado no dispositivo.
+
+### 7. Testando a API
+Você pode importar o arquivo `insomnia/earthsense-api.insomnia.json` no cliente **Insomnia** para testar as rotas de ingestão de dados e a rota de previsão (`ML - Forecast 30 min`). As rotas de usuário usam o header `Authorization: Bearer <token>` (obtido no login); a rota de lote do ESP32 (`Readings - Create IoT Batch`) usa o header `X-Device-Key`.
+
+### 8. Testes automatizados
 
 ```bash
 npm test --workspace backend   # inclui o teste de paridade TypeScript x Python

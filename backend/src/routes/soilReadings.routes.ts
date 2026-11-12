@@ -153,10 +153,14 @@ router.post('/batch', requireDeviceAuth, async (req: DeviceAuthenticatedRequest,
     return sendError(res, 500, error.message || 'Unable to create reading batch.');
   }
 
-  await supabaseAdmin
+  const { error: lastSeenError } = await supabaseAdmin
     .from('devices')
     .update({ last_seen: new Date().toISOString() })
     .eq('id', device.id);
+
+  if (lastSeenError) {
+    console.error(`Unable to update last_seen for device ${device.id}:`, lastSeenError.message);
+  }
 
   return res.status(201).json({
     message: 'Reading batch created successfully.',

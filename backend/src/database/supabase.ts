@@ -16,3 +16,13 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
     autoRefreshToken: false,
   },
 });
+
+export function createAuthClient() {
+  return createClient(supabaseUrl, supabaseServiceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  });
+}

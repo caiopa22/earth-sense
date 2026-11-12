@@ -118,7 +118,7 @@ export function OverviewPage({
                   </EmptyDescription>
                 </Empty>
               ) : (
-                <SoilChart readings={selectedReadings} height={260} />
+                <SoilChart readings={selectedReadings} height={210} />
               )}
             </div>
           </div>

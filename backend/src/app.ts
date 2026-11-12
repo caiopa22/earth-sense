@@ -1,8 +1,8 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-import aiRoutes from './routes/ai.routes.js';
 import devicesRoutes from './routes/devices.routes.js';
+import mlRoutes from './routes/ml.routes.js';
 import soilReadingsRoutes from './routes/soilReadings.routes.js';
 import userRoutes from './routes/user.routes.js';
 
@@ -22,7 +22,7 @@ app.get('/', (req: express.Request, res: express.Response) => {
 app.use('/api/users', userRoutes);
 app.use('/api/devices', devicesRoutes);
 app.use('/api/soil-readings', soilReadingsRoutes);
-app.use('/api/ai', aiRoutes);
+app.use('/api/ml', mlRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);

@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/empty";
 import { Activity, Cpu, Droplets } from "lucide-react";
 import { DeviceList } from "../components/DeviceList";
-import { EarthAgentPreview } from "../components/EarthAgentPreview";
+import { ForecastCard } from "../components/ForecastCard";
 import { HumidityGauge } from "../components/HumidityGauge";
 import { SoilChart } from "../components/SoilChart";
 import { StatCard } from "../components/StatCard";
@@ -16,7 +16,7 @@ import type { DashboardData, Device } from "../types";
 interface OverviewPageProps extends DashboardData {
   selectedDeviceId: string;
   setSelectedDeviceId: (id: string) => void;
-  onOpenAgent: () => void;
+  isMock: boolean;
 }
 
 export function OverviewPage({
@@ -24,7 +24,7 @@ export function OverviewPage({
   readings,
   selectedDeviceId,
   setSelectedDeviceId,
-  onOpenAgent,
+  isMock,
 }: OverviewPageProps) {
   const onlineDevices = devices.filter((d) => d.is_online).length;
 
@@ -142,7 +142,7 @@ export function OverviewPage({
           )}
         </div>
 
-        {/* Right — Devices + Earth Agent */}
+        {/* Right — Devices + Forecast */}
         <div className="flex flex-col gap-4">
           <div className="rounded-2xl border border-border/60 bg-card p-5 flex flex-col gap-3">
             <h2 className="text-sm font-semibold text-foreground">Sensores</h2>
@@ -153,7 +153,7 @@ export function OverviewPage({
             />
           </div>
 
-          <EarthAgentPreview onOpen={onOpenAgent} />
+          {selectedDevice ? <ForecastCard deviceId={selectedDevice.id} isMock={isMock} /> : null}
         </div>
       </div>
     </div>

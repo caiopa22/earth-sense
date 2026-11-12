@@ -81,3 +81,46 @@ export const SOIL_STATUS_BG: Record<SoilStatus, string> = {
   high: "bg-blue-500/10 border-blue-500/20",
   saturated: "bg-violet-500/10 border-violet-500/20",
 };
+
+// ─── 30 min forecast (GET /api/ml/forecast/:deviceId) ─────────────────────────
+
+export interface ForecastModelMetrics {
+  n: number;
+  mae: number;
+  rmse: number;
+  band_hit_rate: number;
+}
+
+export type SensorForecast =
+  | {
+      sensor_index: number;
+      status: "ok";
+      predicted_humidity_pct: number;
+      predicted_soil_status: SoilStatus;
+      last_humidity_pct: number;
+      based_on: string;
+      forecast_for: string;
+      model_metrics: ForecastModelMetrics | null;
+    }
+  | {
+      sensor_index: number;
+      status: "insufficient_data";
+      message: string;
+    }
+  | {
+      sensor_index: number;
+      status: "stale_data";
+      message: string;
+      last_reading_at: string;
+    };
+
+export interface ForecastResponse {
+  device_id: string;
+  horizon_min: number;
+  sensors: SensorForecast[];
+  model: {
+    type: string;
+    trained_at: string;
+    train_samples: number;
+  };
+}

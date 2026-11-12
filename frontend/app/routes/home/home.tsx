@@ -12,7 +12,7 @@ export function meta({}: Route.MetaArgs) {
     {
       name: "description",
       content:
-        "Protótipo de monitoramento periódico da umidade do solo com ESP32, API Node.js, Supabase e Earth Agent (Google Gemini). TCC de Ciência da Computação — UNIP 2026.",
+        "Protótipo de monitoramento periódico da umidade do solo com ESP32, API Node.js, Supabase e previsão de umidade por aprendizado de máquina. TCC de Ciência da Computação — UNIP 2026.",
     },
   ];
 }
@@ -104,8 +104,8 @@ const PIPELINE = [
   {
     n: "04",
     title: "Leitura",
-    where: "React 19 · Google Gemini",
-    body: "O dashboard desenha uma série por sensor e o Earth Agent responde perguntas em linguagem natural usando as leituras recentes como contexto.",
+    where: "React 19 · scikit-learn",
+    body: "O dashboard desenha uma série por sensor e mostra a previsão de umidade para os próximos 30 minutos, calculada por um modelo treinado com as leituras do próprio projeto.",
   },
 ];
 
@@ -117,7 +117,7 @@ const STACK = [
   "Supabase",
   "PostgreSQL",
   "React 19",
-  "Gemini",
+  "scikit-learn",
 ];
 
 /* ------------------------------------------------------------------ */
@@ -140,8 +140,8 @@ export default function Home() {
             <a href="#resultados" className="transition-colors hover:text-(--ink)">
               Resultados
             </a>
-            <a href="#agente" className="transition-colors hover:text-(--ink)">
-              Earth Agent
+            <a href="#previsao" className="transition-colors hover:text-(--ink)">
+              Previsão
             </a>
             <a href="#equipe" className="transition-colors hover:text-(--ink)">
               Equipe
@@ -399,40 +399,45 @@ export default function Home() {
           </div>
         </section>
 
-        {/* EARTH AGENT */}
-        <section id="agente" className="mx-auto max-w-7xl scroll-mt-20 px-5 py-24 sm:px-8 lg:py-32">
+        {/* PREVISÃO */}
+        <section id="previsao" className="mx-auto max-w-7xl scroll-mt-20 px-5 py-24 sm:px-8 lg:py-32">
           <div className="grid gap-14 lg:grid-cols-2 lg:items-center lg:gap-20">
             <div>
               <p className="font-data text-[11px] tracking-[0.2em] text-(--ink-soft) uppercase">
-                Earth Agent · Google Gemini
+                Previsão · Regressão Ridge
               </p>
               <h2 className="font-display mt-5 text-[clamp(2.4rem,5vw,4rem)] leading-[0.95]">
-                Pergunte ao solo
+                A umidade de
                 <br />
-                <em className="text-primary">em português.</em>
+                <em className="text-primary">daqui a 30 minutos.</em>
               </h2>
               <p className="mt-8 max-w-md leading-relaxed text-(--ink-soft)">
-                Em vez de interpretar curvas sozinho, o usuário conversa com um agente que recebe as
-                leituras recentes do dispositivo como contexto e explica o que está acontecendo em
-                cada sensor.
+                Um modelo treinado com as leituras do próprio protótipo estima a umidade de cada
+                sensor meia hora à frente. O erro é medido em dados separados por ordem cronológica
+                e comparado com a estratégia mais simples: repetir o último valor lido.
               </p>
             </div>
 
-            <div className="space-y-4">
-              <div className="ml-auto max-w-sm rounded-3xl rounded-br-md bg-(--ink) px-5 py-4 text-sm text-(--paper)">
-                Qual sensor perdeu mais umidade durante a tarde?
-              </div>
-              <div className="max-w-md rounded-3xl rounded-bl-md border border-(--line) bg-(--paper-2) px-5 py-4 text-sm leading-relaxed">
-                <p className="font-data mb-2 text-[10px] tracking-[0.2em] text-primary uppercase">
-                  Earth Agent
-                </p>
-                O <strong className="font-semibold">S3</strong> teve a maior queda no período de
-                sol. Já o <strong className="font-semibold">S1</strong> e o{" "}
-                <strong className="font-semibold">S4</strong> se estabilizaram depois das 13h, o que
-                é compatível com a volta da sombra sobre esses pontos.
-              </div>
-              <p className="font-data pl-1 text-[10px] text-(--ink-soft)">Exemplo de interação</p>
-            </div>
+            <ol className="space-y-3">
+              {[
+                ["Entrada", "As 4 leituras mais recentes do sensor, suas diferenças, média e desvio."],
+                ["Modelo", "Regressão Ridge treinada em Python e exportada como coeficientes em JSON."],
+                ["Saída", "Umidade prevista para t + 30 min e a faixa correspondente, ao lado do erro médio (MAE) do modelo."],
+              ].map(([label, text], i) => (
+                <li
+                  key={label}
+                  className="flex gap-4 rounded-3xl border border-(--line) bg-(--paper-2) px-5 py-4 text-sm leading-relaxed"
+                >
+                  <span className="font-data pt-0.5 text-[10px] text-primary">0{i + 1}</span>
+                  <div>
+                    <p className="font-data mb-1 text-[10px] tracking-[0.2em] text-primary uppercase">
+                      {label}
+                    </p>
+                    {text}
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
 

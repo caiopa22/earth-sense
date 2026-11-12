@@ -227,4 +227,4 @@ export function useDashboard(): DashboardData & {
   };
 }
 
-export type DashboardPage = "overview" | "devices" | "history" | "agent";
+export type DashboardPage = "overview" | "devices" | "history";

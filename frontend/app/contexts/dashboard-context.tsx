@@ -10,8 +10,8 @@ type DashboardContextValue = {
   setAlerts: React.Dispatch<React.SetStateAction<DashboardAlert[]>>;
   selectedDeviceId: string;
   setSelectedDeviceId: React.Dispatch<React.SetStateAction<string>>;
-  activePage: "overview" | "devices" | "history" | "agent";
-  setActivePage: React.Dispatch<React.SetStateAction<"overview" | "devices" | "history" | "agent">>;
+  activePage: "overview" | "devices" | "history";
+  setActivePage: React.Dispatch<React.SetStateAction<"overview" | "devices" | "history">>;
 };
 
 const DashboardContext = createContext<DashboardContextValue | undefined>(undefined);
@@ -21,7 +21,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [readings, setReadings] = useState<SoilReading[]>([]);
   const [alerts, setAlerts] = useState<DashboardAlert[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState("");
-  const [activePage, setActivePage] = useState<"overview" | "devices" | "history" | "agent">(
+  const [activePage, setActivePage] = useState<"overview" | "devices" | "history">(
     "overview",
   );
 

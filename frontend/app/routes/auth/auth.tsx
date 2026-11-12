@@ -145,7 +145,7 @@ export default function AuthRoute() {
           <p className="text-sm text-muted-foreground leading-relaxed">
             {mode === "login"
               ? "Informe seus dados para acompanhar o sensoriamento de solo em tempo real."
-              : "Cadastre seu perfil para ter acesso à telemetria e pareceres do Earth Agent."}
+              : "Cadastre seu perfil para ter acesso à telemetria e à previsão de umidade."}
           </p>
         </div>
 

@@ -84,6 +84,12 @@ export const SOIL_STATUS_BG: Record<SoilStatus, string> = {
   saturated: "bg-violet-500/10 border-violet-500/20",
 };
 
+export const SENSOR_COLORS = ["var(--primary)", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6"];
+
+export function getSensorColor(sensorIndex: number): string {
+  return SENSOR_COLORS[(sensorIndex - 1 + SENSOR_COLORS.length) % SENSOR_COLORS.length]!;
+}
+
 // ─── 30 min forecast (GET /api/ml/forecast/:deviceId) ─────────────────────────
 
 export interface ForecastModelMetrics {

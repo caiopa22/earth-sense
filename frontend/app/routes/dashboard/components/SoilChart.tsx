@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { SoilReading } from "../types";
+import { getSensorColor, type SoilReading } from "../types";
 
 interface SoilChartProps {
   readings: SoilReading[];
@@ -68,7 +68,6 @@ export function SoilChart({ readings, className, height = 180 }: SoilChartProps)
     });
 
   const data = [...dataByTimestamp.values()];
-  const colors = ["var(--primary)", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6"];
 
   return (
     <div className={cn("w-full", className)}>
@@ -117,12 +116,12 @@ export function SoilChart({ readings, className, height = 180 }: SoilChartProps)
           {sensorIndexes.length > 1 && (
             <Legend formatter={(value) => `Sensor ${value.replace("sensor_", "")}`} />
           )}
-          {sensorIndexes.map((sensorIndex, index) => (
+          {sensorIndexes.map((sensorIndex) => (
             <Area
               key={sensorIndex}
               type="monotone"
               dataKey={`sensor_${sensorIndex}`}
-              stroke={colors[index % colors.length]}
+              stroke={getSensorColor(sensorIndex)}
               strokeWidth={2}
               fill="none"
               dot={false}

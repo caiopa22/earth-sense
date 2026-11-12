@@ -3,7 +3,7 @@ import { cn } from "cn";
 import { format } from "date-fns";
 import { TrendingUp } from "lucide-react";
 import { useForecast } from "../hooks/useForecast";
-import { SOIL_STATUS_BG, SOIL_STATUS_COLOR, SOIL_STATUS_LABEL } from "../types";
+import { getSensorColor, SOIL_STATUS_COLOR, SOIL_STATUS_LABEL } from "../types";
 
 interface ForecastCardProps {
   deviceId: string;
@@ -42,15 +42,15 @@ export function ForecastCard({ deviceId, isMock }: ForecastCardProps) {
             {forecast.sensors.map((sensor) => (
               <li
                 key={sensor.sensor_index}
-                className={cn(
-                  "rounded-xl border px-3 py-2.5 flex flex-col gap-1",
-                  sensor.status === "ok"
-                    ? SOIL_STATUS_BG[sensor.predicted_soil_status]
-                    : "border-border/60",
-                )}
+                className="rounded-xl border border-border/60 border-t-2 bg-muted/20 px-3 py-2.5 flex flex-col gap-1"
+                style={{ borderTopColor: getSensorColor(sensor.sensor_index) }}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-medium text-muted-foreground">
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                    <span
+                      className="size-2 rounded-full"
+                      style={{ background: getSensorColor(sensor.sensor_index) }}
+                    />
                     Sensor {sensor.sensor_index}
                   </span>
                   {sensor.status === "ok" ? (

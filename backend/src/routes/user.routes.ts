@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { supabaseAdmin } from '../database/supabase.js';
+import { createAuthClient, supabaseAdmin } from '../database/supabase.js';
 import { requireAdmin, requireAuth, type AuthenticatedRequest } from '../middlewares/authMiddleware.js';
 import type { LoginRequestBody, RefreshTokenRequestBody, SignupRequestBody } from '../types/auth.js';
 import type { UpdateUserRoleRequestBody } from '../types/profile.js';
@@ -44,7 +44,7 @@ router.post('/signup', async (req, res) => {
     return sendError(res, 400, 'Email, password, and name are required.');
   }
 
-  const { data, error } = await supabaseAdmin.auth.signUp({
+  const { data, error } = await createAuthClient().auth.signUp({
     email,
     password,
     options: {
@@ -97,7 +97,7 @@ router.post('/login', async (req, res) => {
     return sendError(res, 400, 'Email and password are required.');
   }
 
-  const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+  const { data, error } = await createAuthClient().auth.signInWithPassword({
     email,
     password,
   });
@@ -195,7 +195,7 @@ router.post('/logout', requireAuth, async (req: AuthenticatedRequest, res) => {
     return sendError(res, 400, 'Authentication token is missing.');
   }
 
-  const { error } = await supabaseAdmin.auth.signOut();
+  const { error } = await supabaseAdmin.auth.admin.signOut(token, 'local');
 
   if (error) {
     return sendError(res, 500, error.message || 'Unable to log out.');
@@ -211,7 +211,7 @@ router.post('/refresh-token', async (req, res) => {
     return sendError(res, 400, 'Refresh token is required.');
   }
 
-  const { data, error } = await supabaseAdmin.auth.refreshSession({
+  const { data, error } = await createAuthClient().auth.refreshSession({
     refresh_token: refreshToken,
   });
 

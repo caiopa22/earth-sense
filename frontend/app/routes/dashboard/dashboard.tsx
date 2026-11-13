@@ -4,7 +4,6 @@ import { Header } from "~/routes/dashboard/components/Header";
 import { Sidebar } from "~/routes/dashboard/components/Sidebar";
 import { useDashboard } from "~/routes/dashboard/hooks/useDashboard";
 import { DevicesPage } from "~/routes/dashboard/pages/DevicesPage";
-import { EarthAgentPage } from "~/routes/dashboard/pages/EarthAgentPage";
 import { HistoryPage } from "~/routes/dashboard/pages/HistoryPage";
 import { OverviewPage } from "~/routes/dashboard/pages/OverviewPage";
 
@@ -84,7 +83,7 @@ export default function DashboardRoute() {
               isLoading={false}
               selectedDeviceId={selectedDeviceId}
               setSelectedDeviceId={setSelectedDeviceId}
-              onOpenAgent={() => setActivePage("agent")}
+              isMock={dataSource === "mock"}
             />
           )}
           {activePage === "devices" && (
@@ -96,7 +95,6 @@ export default function DashboardRoute() {
             />
           )}
           {activePage === "history" && <HistoryPage devices={devices} readings={readings} />}
-          {activePage === "agent" && <EarthAgentPage />}
         </main>
       </div>
     </div>

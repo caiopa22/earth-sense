@@ -189,7 +189,7 @@ export function DevicesPage({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {devices.map((device) => {
-              const humidity = device.last_reading?.humidity_pct ?? null;
+              const humidity = device.current_humidity_pct ?? null;
               const status = humidity !== null ? getSoilStatus(humidity) : null;
 
               return (

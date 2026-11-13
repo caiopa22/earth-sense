@@ -1,0 +1,146 @@
+{
+  "generated_at": "2026-11-11T18:39:54+00:00",
+  "source_csv": "ml/data/soil_readings.csv",
+  "config": {
+    "window": 4,
+    "horizon_min": 30,
+    "target_tolerance_min": 3,
+    "max_gap_min": 10,
+    "test_fraction": 0.2,
+    "split": "chronological per sensor, no shuffling",
+    "ridge": "Ridge(alpha=1.0) + StandardScaler, default parameters",
+    "random_forest": "RandomForestRegressor(random_state=42), default parameters"
+  },
+  "dataset": {
+    "readings": 1300,
+    "samples": 1195,
+    "train_samples": 925,
+    "test_samples": 240,
+    "test_period": [
+      "2026-09-28T12:41:58.475741+00:00",
+      "2026-09-28T16:38:56.504346+00:00"
+    ]
+  },
+  "models": {
+    "persistence": {
+      "overall": {
+        "n": 240,
+        "mae": 4.7737,
+        "rmse": 7.1958,
+        "band_hit_rate": 0.7958
+      },
+      "per_sensor": {
+        "1": {
+          "n": 48,
+          "mae": 2.0923,
+          "rmse": 3.0331,
+          "band_hit_rate": 0.9583
+        },
+        "2": {
+          "n": 48,
+          "mae": 0.8225,
+          "rmse": 1.6451,
+          "band_hit_rate": 1.0
+        },
+        "3": {
+          "n": 48,
+          "mae": 5.2865,
+          "rmse": 7.02,
+          "band_hit_rate": 0.75
+        },
+        "4": {
+          "n": 48,
+          "mae": 6.5698,
+          "rmse": 8.9729,
+          "band_hit_rate": 0.7708
+        },
+        "5": {
+          "n": 48,
+          "mae": 9.0973,
+          "rmse": 10.8258,
+          "band_hit_rate": 0.5
+        }
+      }
+    },
+    "ridge": {
+      "overall": {
+        "n": 240,
+        "mae": 5.4051,
+        "rmse": 7.8857,
+        "band_hit_rate": 0.775
+      },
+      "per_sensor": {
+        "1": {
+          "n": 48,
+          "mae": 1.5979,
+          "rmse": 2.4366,
+          "band_hit_rate": 0.9375
+        },
+        "2": {
+          "n": 48,
+          "mae": 0.8712,
+          "rmse": 1.3852,
+          "band_hit_rate": 1.0
+        },
+        "3": {
+          "n": 48,
+          "mae": 6.5772,
+          "rmse": 8.2022,
+          "band_hit_rate": 0.6875
+        },
+        "4": {
+          "n": 48,
+          "mae": 6.9928,
+          "rmse": 9.0195,
+          "band_hit_rate": 0.7917
+        },
+        "5": {
+          "n": 48,
+          "mae": 10.9861,
+          "rmse": 12.4272,
+          "band_hit_rate": 0.4583
+        }
+      }
+    },
+    "random_forest": {
+      "overall": {
+        "n": 240,
+        "mae": 5.1029,
+        "rmse": 7.1773,
+        "band_hit_rate": 0.8542
+      },
+      "per_sensor": {
+        "1": {
+          "n": 48,
+          "mae": 2.0843,
+          "rmse": 2.8834,
+          "band_hit_rate": 0.8958
+        },
+        "2": {
+          "n": 48,
+          "mae": 2.4148,
+          "rmse": 2.5902,
+          "band_hit_rate": 1.0
+        },
+        "3": {
+          "n": 48,
+          "mae": 7.8713,
+          "rmse": 10.6687,
+          "band_hit_rate": 0.8333
+        },
+        "4": {
+          "n": 48,
+          "mae": 6.637,
+          "rmse": 7.661,
+          "band_hit_rate": 0.8958
+        },
+        "5": {
+          "n": 48,
+          "mae": 6.5068,
+          "rmse": 8.3684,
+          "band_hit_rate": 0.6458
+        }
+      }
+    }
+  }
+}

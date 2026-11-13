@@ -11,11 +11,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { SoilReading } from "../types";
+import { getSensorColor, type SoilReading } from "../types";
 
 interface SoilChartProps {
   readings: SoilReading[];
   className?: string;
+  height?: number;
 }
 
 type ChartRangeHours = 6 | 24 | 48;
@@ -47,7 +48,7 @@ function CustomTooltip({ active, payload, label }: any) {
   );
 }
 
-export function SoilChart({ readings, className }: SoilChartProps) {
+export function SoilChart({ readings, className, height = 180 }: SoilChartProps) {
   const [rangeHours, setRangeHours] = useState<ChartRangeHours>(24);
   const rangeStart = Date.now() - rangeHours * 60 * 60 * 1000;
   const sensorIndexes = [...new Set(readings.map((reading) => reading.sensor_index ?? 1))].sort(
@@ -67,7 +68,6 @@ export function SoilChart({ readings, className }: SoilChartProps) {
     });
 
   const data = [...dataByTimestamp.values()];
-  const colors = ["var(--primary)", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6"];
 
   return (
     <div className={cn("w-full", className)}>
@@ -88,7 +88,7 @@ export function SoilChart({ readings, className }: SoilChartProps) {
           </Button>
         ))}
       </div>
-      <ResponsiveContainer width="100%" height={180}>
+      <ResponsiveContainer width="100%" height={height}>
         <AreaChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
           <CartesianGrid
             strokeDasharray="3 3"
@@ -116,12 +116,12 @@ export function SoilChart({ readings, className }: SoilChartProps) {
           {sensorIndexes.length > 1 && (
             <Legend formatter={(value) => `Sensor ${value.replace("sensor_", "")}`} />
           )}
-          {sensorIndexes.map((sensorIndex, index) => (
+          {sensorIndexes.map((sensorIndex) => (
             <Area
               key={sensorIndex}
               type="monotone"
               dataKey={`sensor_${sensorIndex}`}
-              stroke={colors[index % colors.length]}
+              stroke={getSensorColor(sensorIndex)}
               strokeWidth={2}
               fill="none"
               dot={false}

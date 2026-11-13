@@ -13,7 +13,6 @@ const navItems: { page: DashboardPage; icon: typeof LayoutDashboard; label: stri
   { page: "overview", icon: LayoutDashboard, label: "Visão Geral" },
   { page: "devices", icon: Cpu, label: "Dispositivos" },
   { page: "history", icon: Clock, label: "Histórico" },
-  { page: "agent", icon: Sparkles, label: "Earth Agent" },
 ];
 
 export function Sidebar({ activePage, onNavigate }: SidebarProps) {
